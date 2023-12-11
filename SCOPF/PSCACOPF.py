@@ -102,14 +102,14 @@ print('Study Year: %s' %year)
 
 # TODO: define scenarios
 scenario = 1
-if scenario == 1:
+if scenario == 1:  # Summer minimum AM Leading the way
     WIND_AVAILABILITY = 0.8
-    SCOTLAND_LOAD = 1298  # Summer minimum AM Leading the way
-    EW_load = 22987  # England and Wales
+    SCOTLAND_LOAD = 2597
+    EW_load = 25584  # England and Wales
     DER_SHARE = 0.4
 elif scenario == 2:  # Winter peak Leading the way
     WIND_AVAILABILITY = 0.8
-    SCOTLAND_LOAD = (1545 + 4029)
+    SCOTLAND_LOAD = 5574
     EW_load = 57179
     DER_SHARE = 0.4
 
