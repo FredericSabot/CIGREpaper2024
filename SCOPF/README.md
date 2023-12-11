@@ -1,3 +1,5 @@
+Based on [https://github.com/FredericSabot/PDSA-RTS-GMLC](https://github.com/FredericSabot/PDSA-RTS-GMLC), please refer to this source for usage/requirements.
+
 Main file: PSCACOPF.py
 
 Comments:
