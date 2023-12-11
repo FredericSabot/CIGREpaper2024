@@ -1,0 +1,7 @@
+SCOPF/**/*.gdx
+SCOPF/**/*.lst
+SCOPF/**/*.pf
+SCOPF/**/*.dat
+SCOPF/**/*.log*
+SCOPF/**/*.lxi
+SCOPF/results.csv
