@@ -534,7 +534,7 @@ hvdc_interconnection_costs.append(50 * baseMVA)
 
 dispatchable_load_costs = []
 for load in dispatchable_loads:
-    dispatchable_load_costs.append(100 * baseMVA)
+    dispatchable_load_costs.append(40 * baseMVA)
 
 
 wind_max = []

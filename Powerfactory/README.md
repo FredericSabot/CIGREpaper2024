@@ -6,3 +6,5 @@ Dispatches are generated based on the scenarios below using a security-constrain
 |----------|-------------------|-----------------|-------------------|---------------------|-----------|------|
 | 1        | Summer minimum AM | Leading the way | 2597              | 25584               | 0.4       | 0.8  |
 | 2        | Winter peak       | Leading the way | 5574              | 57179               | 0.4       | 0.8  |
+
+Data are in Powerfactory 2022 SP4 format
