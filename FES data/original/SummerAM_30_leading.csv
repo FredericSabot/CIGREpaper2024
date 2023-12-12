@@ -1,0 +1,480 @@
+﻿Elexon ID,Name,Minor FLOP,Major FLOP,P(Gross),Q Gross,Q net,Embedded Storage,Embedded Solar,Embedded Wind,Embedded Hydro,Embedded Other,Dx Storage Demand,Micro storage Demand,DSR
+ABNE_P,Abernethy,T4,T,10.84,0.3,-1.3,1,74,26,2,3,0,0,N/A for summer
+ABTH_1,Aberthaw,H2,H,74,-31.2,-43.1,2,167,1,0,70,0,0,N/A for summer
+ABHA1,Abham,F6,F,104,-17.2,-29.9,32,478,1,2,88,0,0,N/A for summer
+ACTL_C,Acton Lane 22kV,A7,A,13,0.0,-5.8,0,4,0,0,2,0,0,N/A for summer
+ACTL_2,Acton Lane 66kV,A7,A,9,-0.9,-3.8,1,14,0,0,1,0,0,N/A for summer
+ALNE_P,Alness,T5,T,41,3.8,2.9,0,14,32,7,5,0,0,N/A for summer
+ALST_3,Alpha Steel (Uskmouth),H2,H,3,-0.1,-0.3,0,8,0,0,4,0,0,N/A for summer
+ALVE1,Alverdiscott,F6,F,102,11.6,8.4,14,611,227,2,30,0,0,N/A for summer
+AMEM_1,Amersham Main,A6,A,24,6.3,-3.7,153,38,0,0,3,0,0,N/A for summer
+ARBR_P,Arbroath,T4,T,10,-1.0,-1.9,1,87,7,0,3,0,0,N/A for summer
+ARDK_P,Ardkinglas,T3,T,0,0.0,0.0,0,3,0,5,0,0,0,N/A for summer
+ARMO_P,Ardmore,T1,T,8,11.0,6.7,1,21,45,0,1,0,0,N/A for summer
+AXMI1,Axminster,E1,E,67,8.3,0.7,56,432,0,0,11,0,0,N/A for summer
+AYRR,Ayr,S6,S,16,1.4,-2.7,0,4,0,0,0,0,0,N/A for summer
+BAIN,Bainsford,S5,S,12,1.8,-1.8,0,12,4,0,1,0,0,N/A for summer
+BARKC1,Barking,A1,A,21,55.4,14.2,2,43,0,0,84,0,0,N/A for summer
+BARKW3,Barking West,A1,A,90,64.0,14.2,0,6,0,0,34,0,0,N/A for summer
+BAGA,Bathgate,S5,S,36,8.9,1.9,1,20,74,0,2,0,0,N/A for summer
+BEAU_P,Beauly,T1,T,13,0.8,-1.1,1,10,3,6,0,0,0,N/A for summer
+BEDDT1,Beddington (_C),A8,A,34,-0.5,-13.3,1,17,0,0,4,0,0,N/A for summer
+BEDD_1,Beddington (_J),A8,A,169,-8.1,-70.1,3,50,0,1,55,0,0,N/A for summer
+BESW_1,Berkswell,L3,L,121,-42.7,-76.6,4,142,0,0,30,0,0,N/A for summer
+BERB_P,Berryburn,T1,T,0,0.0,0.0,0,0,0,0,0,0,0,N/A for summer
+BERW,Berwick,S6,S,50,14.1,6.0,1,15,145,0,1,0,0,N/A for summer
+BICF_1,Bicker Fen,K4,K,120,43.5,38.2,10,518,212,0,20,0,0,N/A for summer
+BIRK_1,Birkenhead,N3,N,23,-55.5,-59.0,2,39,0,0,26,0,0,N/A for summer
+BISW_1,Bishops Wood,L2,L,208,39.1,-46.4,125,343,50,0,386,0,0,N/A for summer
+BLYTB1,Blyth 66kV,Q6,Q,245,-8.8,-8.7,4,89,119,0,33,0,0,N/A for summer
+BLYTH132,Blyth 132kV,Q6,Q,13,-0.3,-0.3,1,81,151,0,3,0,0,N/A for summer
+BOAG_P,Boat of Garten,T1,T,23,-2.6,-3.3,0,9,0,11,1,0,0,N/A for summer
+BOLN_1,Bolney,B1,B,319,10.3,-156.9,148,260,0,0,82,0,0,N/A for summer
+BONN,Bonnybridge,S5,S,8,-2.1,-8.8,21,19,20,1,5,0,0,N/A for summer
+BOTW_1,Botley Wood,B2,B,63,26.1,4.8,63,206,0,0,5,0,0,N/A for summer
+BRAC_P,Braco West,T4,T,14,2.3,0.4,1,18,1,5,2,0,0,N/A for summer
+BRAW_1,Bradford West,P1,P,135,74.0,-100.6,40,90,31,1,64,0,0,N/A for summer
+BRAP,Braehead Park,S6,S,13,0.7,-0.4,0,5,0,0,0,0,0,N/A for summer
+BRAI_1,Braintree,J8,J,78,-38.6,-44.3,14,134,0,0,15,0,0,N/A for summer
+BRFO_1,Bramford,J5,J,181,-14.0,-29.5,192,694,74,0,218,0,0,N/A for summer
+BRLE_1,Bramley,B4,B,221,18.6,-88.0,26,262,1,0,93,0,0,N/A for summer
+BRED_1,Bredbury,N2,N,113,126.8,-56.6,73,63,0,0,89,0,0,N/A for summer
+BRID_P,Bridge of Dun,T4,T,14,7.7,6.4,1,13,12,0,3,0,0,N/A for summer
+BRWA1,Bridgewater,E7,E,95,-15.7,-15.7,19,546,3,0,35,0,0,N/A for summer
+BRIM_1,Brimsdown,A3,A,118,8.2,-70.5,2,85,0,0,16,0,0,N/A for summer
+BROA_P,Broadford,T1,T,6,-0.3,-0.7,0,4,15,3,0,0,0,N/A for summer
+BROR_P,Brora,T5,T,4,0.1,-0.1,0,2,0,0,0,0,0,N/A for summer
+BROX,Broxburn,S6,S,22,5.7,2.4,0,7,0,0,3,0,0,N/A for summer
+BUMU_P,Burghmuir,T4,T,15,-0.4,-2.4,1,13,0,1,0,0,0,N/A for summer
+BURM_1,Burwell Main,J7,J,136,-7.4,-28.1,63,977,44,0,18,0,0,N/A for summer
+BUSH_1,Bushbury,L2,L,46,1.6,-23.0,3,91,7,0,38,0,0,N/A for summer
+BUST_1,Bustleholme,L3,L,111,44.5,-128.5,2,64,0,0,17,0,0,N/A for summer
+CAIF_P,Cairnford,T2,T,0,0.0,0.0,0,0,0,0,0,0,0,N/A for summer
+CAMB_01,Camblesforth,P4,P,1,-0.1,-5.8,35,23,124,0,19,0,0,N/A for summer
+CBNK_H,Canal Bank,A7,A,18,-1.8,-8.0,0,4,0,0,1,0,0,N/A for summer
+CANTN1,Canterbury,C7,C,90,-16.1,-30.5,4,256,151,0,69,0,0,N/A for summer
+CAPEA1,Capenhurst,N3,N,116,11.8,-28.0,21,49,0,0,23,0,0,N/A for summer
+CARE_1,Cardiff East,H2,H,72,-29.4,-42.2,52,64,4,0,65,0,0,N/A for summer
+CATY,Carntyne,S6,S,7,2.6,0.6,0,2,0,0,2,0,0,N/A for summer
+CAAD_P,Carradale,T3,T,17,1.0,-1.0,0,5,11,1,2,0,0,N/A for summer
+CARR_1,Carrington,N2,N,136,28.9,-75.4,2,35,0,1,144,0,0,N/A for summer
+CAFA,Carsfad,S6,S,0,0.0,0.0,0,1,0,0,0,0,0,N/A for summer
+CASS_P,Cassley,T5,T,1,1.4,1.2,0,2,0,5,0,0,0,N/A for summer
+CEAN_P,Ceannacroc,T1,T,0,0.0,0.0,0,0,0,2,0,0,0,N/A for summer
+CELL_1,Cellarhead,L5,L,242,-67.0,-86.7,15,261,4,0,59,0,0,N/A for summer
+CHAP,Chapelcross,S6,S,1,138.3,127.7,1,14,38,1,3,0,0,N/A for summer
+CHAR_P,Charleston,T4,T,10,-0.2,-0.7,0,0,8,2,7,0,0,N/A for summer
+CHAS,Charlotte Street,S6,S,24,1.8,-1.0,0,4,0,0,1,0,0,N/A for summer
+CHSI_1,Chessington,A8,A,91,25.2,-23.7,2,46,0,0,9,0,0,N/A for summer
+CHTE_1,Chesterfield,P3,P,209,-26.4,-53.7,90,439,41,0,240,0,0,N/A for summer
+CHIC_1,Chickerell,E1,E,32,-2.7,-6.1,3,253,1,0,6,0,0,N/A for summer
+CITR_1,City Road,A7,A,362,195.5,-7.9,0,7,0,0,14,0,0,N/A for summer
+CLAC_P,Clachan,T3,T,7,0.0,0.0,0,6,0,15,0,0,0,N/A for summer
+CLT03,Clacton,J5,J,118.0,44.2,-13.9,0,42,0,0,14,0,0,N/A for summer
+CLAY_P,Clayhills,T2,T,11,2.7,0.6,0,4,0,0,5,0,0,N/A for summer
+CLYM,Clyde’s Mill,S6,S,26,1.6,-7.0,0,1,0,0,13,0,0,N/A for summer
+COAT,Coatbridge,S6,S,23,1.1,-2.7,1,12,3,0,1,0,0,N/A for summer
+COCK,Cockenzie,S6,S,19,-0.2,-4.2,1,13,1,0,4,0,0,N/A for summer
+CONQA1,Connah's Quay,M5,M,189,0.0,0.0,105,234,210,0,43,0,0,N/A for summer
+COUA_P,Coupar Angus,T4,T,10,3.6,2.6,1,15,10,2,2,0,0,N/A for summer
+COVE_1,Coventry,L3,L,170,-23.6,-52.8,7,153,127,0,134,0,0,N/A for summer
+COWL_1,Cowley,D6,D,239,-30.8,-117.9,59,695,0,1,54,0,0,N/A for summer
+COYL,Coylton,S6,S,37,8.3,6.5,1,12,55,2,15,0,0,N/A for summer
+CRAI_P,Craigiebuckler,T2,T,15,-7.7,-7.9,0,1,1,0,1,0,0,N/A for summer
+CREB_1,Creyke Beck,P8,P,170,-6.0,-45.1,110,215,215,0,223,0,0,N/A for summer
+CUMB,Cumbernauld,S5,S,19,2.3,-2.6,1,17,6,0,35,0,0,N/A for summer
+CUPA,Cupar,S5,S,19,-0.2,-0.7,1,51,7,0,9,0,0,N/A for summer
+CURR,Currie,S6,S,4,-0.2,-0.2,0,0,0,0,1,0,0,N/A for summer
+DALL_P,Dallas,T1,T,0,0.0,0.0,0,0,0,0,0,0,0,N/A for summer
+DALM3,Dalmarnock,S6,S,19,2.0,-0.6,0,7,0,0,10,0,0,N/A for summer
+DEVM,Devol Moor,S6,S,12,-1.8,-3.2,0,5,36,0,0,0,0,N/A for summer
+DEVO,Devonside,S5,S,23,5.9,-2.1,1,62,100,1,3,0,0,N/A for summer
+DEWP,Dewar Place,S6,S,27,6.9,3.0,0,1,0,0,0,0,0,N/A for summer
+DOUN_P,Dounreay,T5,T,3,2.6,2.1,0,10,16,0,0,0,0,N/A for summer
+DRAK_1,Drakelow,L2,L,78,26.9,-7.4,53,220,2,0,46,0,0,N/A for summer
+DRAX_1,Drax,P4,P,48,-3.3,-7.2,1,38,51,0,91,0,0,N/A for summer
+DRUM,Drumchapel,S5,S,21,14.9,2.6,0,4,0,0,1,0,0,N/A for summer
+DRCR,Drumcross,S5,S,13,-3.5,-5.5,30,9,0,0,0,0,0,N/A for summer
+DUDH_P,Dudhope,T4,T,15,2.1,-0.3,1,10,0,0,0,0,0,N/A for summer
+DUNB,Dunbar,S6,S,0,0.0,-7.1,0,1,0,0,0,0,0,N/A for summer
+DUBE_P,Dunbeath,T5,T,0,1.3,-0.4,0,0,0,0,0,0,0,N/A for summer
+DUNF,Dunfermline,S5,S,12,1.9,0.4,0,15,1,0,18,0,0,N/A for summer
+DUNO_P,Dunoon,S5,S,8,3.0,3.0,0,14,0,12,0,0,0,N/A for summer
+DUGR_P,Dunvegan,T1,T,0,2.7,2.3,0,2,0,0,0,0,0,N/A for summer
+DYCE_P,Dyce,T2,T,14,1.3,-1.1,1,22,27,0,3,0,0,N/A for summer
+EALI_6,Ealing,A7,A,83,-1.8,-28.3,1,17,0,0,15,0,0,N/A for summer
+EAST,Earlstoun,S6,S,0,0.0,0.0,0,1,0,2,0,0,0,N/A for summer
+ECLA_1,East Claydon,D4,D,144,66.7,12.7,91,328,1,0,117,0,0,N/A for summer
+ECLA_H,East Claydon,D4,D,0,0.0,0.0,0,0,0,0,9,0,0,N/A for summer
+EKIL,East Kilbride,S6,S,20,-1.1,-6.2,1,15,0,1,0,0,0,N/A for summer
+EKIS,East Kilbride South,S6,S,33,7.8,-1.5,0,1,107,0,11,0,0,N/A for summer
+EERH,Easterhouse,S6,S,22,1.5,-4.7,1,12,0,0,3,0,0,N/A for summer
+EASO_1,Eaton Socon,J4,J,78,-1.7,-16.0,107,567,78,0,11,0,0,N/A for summer
+ECCL,Eccles,S6,S,17,-3.8,-5.8,1,22,42,0,1,0,0,N/A for summer
+ELDE,Elderslie,S6,S,9,3.8,1.1,0,7,0,0,1,0,0,N/A for summer
+ELGI_P,Elgin,T1,T,16,3.4,0.2,1,22,5,0,3,0,0,N/A for summer
+ELLA_1,Elland,P1,P,119,47.2,-35.6,30,82,58,0,62,0,0,N/A for summer
+ELST_1,Elstree,A6,A,83,34.2,-4.3,53,53,0,0,16,0,0,N/A for summer
+ENDE_1,Enderby,L8,L,184,52.5,-47.8,60,261,3,0,28,0,0,N/A for summer
+ERSK,Erskine,S6,S,10,-1.8,-2.6,30,2,0,0,1,0,0,N/A for summer
+EXET1,Exeter,F6,F,127,-22.3,-39.1,11,447,1,0,31,0,0,N/A for summer
+FASN_P,Fasnakyle,T1,T,8,0.0,0.0,0,1,3,1,0,0,0,N/A for summer
+FAWL_1,Fawley,B2,B,154,31.8,-28.7,4,284,0,7,10,0,0,N/A for summer
+FECK_6,Feckenham,L3,L,129,41.3,-10.8,13,497,1,0,145,0,0,N/A for summer
+FERRA2,Ferrybridge A,P5,P,39,9.4,0.1,1,59,1,0,28,0,0,N/A for summer
+FERRB1,Ferrybridge B,P5,P,0,0.0,-4.7,8,156,8,1,12,0,0,N/A for summer
+FERRB_M,Ferrybridge B,P6,P,32,-8.4,-8.4,0,0,14,0,179,0,0,N/A for summer
+FETT_P,Fetteresso,T2,T,0,0.0,0.0,0,0,0,0,1,0,0,N/A for summer
+FIDD_P,Fiddes,T2,T,25,-0.7,-0.8,1,27,46,0,1,0,0,N/A for summer
+FIDF_1,Fiddlers Ferry,N1,N,96,-5.8,-26.1,5,83,1,0,111,0,0,N/A for summer
+FINN,Finnieston,S5,S,18,0.3,-2.8,0,0,0,0,0,0,0,N/A for summer
+FLEE_1,Fleet,B3,B,325,258.9,160.6,12,313,28,22,84,0,0,N/A for summer
+FAUG_P,Fort Augustus,T1,T,9,-0.7,-1.4,0,5,0,20,0,0,0,N/A for summer
+FWIL_P,Fort William,T1,T,47,14.6,13.0,0,18,0,31,1,0,0,N/A for summer
+FOUR_1,Fourstones,Q8,Q,22,-10.2,-10.3,20,36,128,0,1,0,0,N/A for summer
+FRAS_P,Fraserburgh,T2,T,7,4.4,2.3,1,5,2,0,0,0,0,N/A for summer
+FROD_1,Frodsham,N3,N,134,9.7,-4.9,525,162,82,0,248,0,0,N/A for summer
+GALA,Galashiels,S6,S,27,5.6,1.3,1,15,25,0,4,0,0,N/A for summer
+GIFF,Giffnock,S6,S,18,-2.0,-8.6,0,5,6,0,2,0,0,N/A for summer
+GLEF_P,Glenfarclas,T1,T,0,0.0,0.0,0,0,0,0,0,0,0,N/A for summer
+GLLE,Glenlee,S6,S,0,0.0,0.0,0,1,0,55,0,0,0,N/A for summer
+GLLU,Glenluce,S6,S,25,4.6,1.0,1,9,114,0,3,0,0,N/A for summer
+GLNI,Glenniston,S5,S,4,5.1,3.8,0,14,49,0,0,0,0,N/A for summer
+GLRO,Glenrothes,S5,S,14,4.6,-0.1,30,15,0,1,1,0,0,N/A for summer
+GORG,Gorgie,S6,S,13,3.0,2.1,0,1,0,0,1,0,0,N/A for summer
+GOVA,Govan,S6,S,15,3.7,1.7,0,5,0,0,1,0,0,N/A for summer
+GREE_H,Greenford,A7,A,18,-1.7,-7.7,0,4,0,0,1,0,0,N/A for summer
+GREN_1,Grendon,J6,J,248,-60.3,-70.5,65,837,151,0,196,0,0,N/A for summer
+GRIW_1,Grimsby West,P7,P,122,-1.8,-8.3,80,140,39,0,174,0,0,N/A for summer
+GRUB_P,Grudie Bridge,T1,T,13,0.1,0.1,0,12,1,34,1,0,0,N/A for summer
+HACK_1,Hackney 132kV,A1,A,57,15.2,-5.4,1,26,0,0,5,0,0,N/A for summer
+HACK_6,Hackney 66kV,A1,A,54,18.2,-4.6,0,6,0,0,5,0,0,N/A for summer
+HAGR,Haggs Road,S6,S,13,1.3,-1.1,0,3,0,0,1,0,0,N/A for summer
+HAMHC1,Hams Hall,L3,L,150,92.5,48.9,102,126,0,0,36,0,0,N/A for summer
+HARK_1,Harker,Q8,Q,150,-18.6,-18.7,6,218,297,16,139,0,0,N/A for summer
+HARM_6,Hart Moor,Q4,Q,33,-8.0,-16.7,32,45,64,0,87,0,0,N/A for summer
+HAWI,Hawick,S6,S,15,3.1,-0.3,0,7,23,0,1,0,0,N/A for summer
+HAWP_6,Hawthorn Pit,Q4,Q,34,-5.2,-12.4,3,71,29,0,6,0,0,N/A for summer
+HELE,Helensburgh,S5,S,8,-0.9,-1.9,30,4,0,0,0,0,0,N/A for summer
+HEYS_1,Heysham (NGET),R5,R,3,0.0,0.0,77,85,37,0,13,0,0,N/A for summer
+HEYS1,Heysham (Barrow WF),R5,R,39,-38.9,-38.9,0,35,0,0,1,0,0,N/A for summer
+HUER,Hunterston Farm,S6,S,1,0.0,-1.8,0,1,0,0,0,0,0,N/A for summer
+HURS_1,Hurst,A8,A,96,-91.3,-132.0,2,30,0,0,10,0,0,N/A for summer
+HUTT_1,Hutton,R6,R,13,-1.9,-18.2,3,154,4,6,7,0,0,N/A for summer
+IMPK_1,Imperial Park,H6,H,11,11.9,3.5,0,140,0,0,0,0,0,N/A for summer
+INDQ1,Indian Queens,F6,F,185,31.7,17.0,45,830,132,1,108,0,0,N/A for summer
+INKE,Inverkeithing,S5,S,17,-0.2,-2.2,1,17,2,0,0,0,0,N/A for summer
+INNE_P,Inverness,T1,T,38,-1.2,-5.0,1,14,1,10,2,0,0,N/A for summer
+IROA1,Iron Acton,G5,G,232,-38.4,-80.0,261,515,21,0,94,0,0,N/A for summer
+IRONB1,Ironbridge,L5,L,76,-7.9,-12.4,3,179,1,0,96,0,0,N/A for summer
+ISLI_1,Islington,A7,A,153,43.1,43.1,0,0,0,0,3,0,0,N/A for summer
+IVER_1,Iver 132kV,A6,A,145,34.6,-37.8,9,46,0,0,17,0,0,N/A for summer
+IVER_6,Iver 66kV,A6,A,72,3.3,-21.7,1,16,7,0,52,0,0,N/A for summer
+JOHN,Johnstone,S6,S,16,1.3,0.3,0,7,2,0,5,0,0,N/A for summer
+JORD_3,Jordanthorpe,P3,P,14,-4.8,-7.3,1,17,0,0,2,0,0,N/A for summer
+KAIM,Kaimes,S6,S,42,3.8,-3.6,2,35,44,0,6,0,0,N/A for summer
+KEAD_1,Keadby,P8,P,180,18.2,-25.2,59,299,189,0,228,0,0,N/A for summer
+KEAR_1,Kearsley 132kV,N4,N,177,115.9,-30.6,41,115,1,0,93,0,0,N/A for summer
+KEAR_3,Kearsley 33kV,N4,N,40,8.3,-8.8,0,22,0,0,28,0,0,N/A for summer
+KEIT_P,Keith,T1,T,23,0.0,-0.1,11,34,51,3,8,0,0,N/A for summer
+KEMS_1,Kemsley,C3,C,46,15.4,-14.2,2,222,34,0,23,0,0,N/A for summer
+KEOO,Kendoon,S6,S,0,0.0,0.0,0,1,0,59,0,0,0,N/A for summer
+KIER,Killermont,S5,S,23,10.2,2.5,0,15,0,0,7,0,0,N/A for summer
+KIIN_P,Killin,T4,T,2,10.3,8.0,0,7,0,10,6,0,0,N/A for summer
+KILS,Kilmarnock South,S6,S,15,4.8,2.4,0,8,22,0,3,0,0,N/A for summer
+KILT,Kilmarnock Town,S6,S,25,5.3,0.8,1,9,14,0,10,0,0,N/A for summer
+KILW,Kilwinning,S6,S,4,-1.7,-8.2,40,8,14,0,23,0,0,N/A for summer
+KINO_1,Kingsnorth,C2,C,62,-55.7,-84.9,51,93,0,0,19,0,0,N/A for summer
+KINL_P,Kinlochleven,T1,T,0,16.6,14.2,0,0,0,2,0,0,0,N/A for summer
+KINT_P,Kintore,T2,T,2,12.0,11.4,2,50,9,0,1,0,0,N/A for summer
+KIBY_1,Kirkby (_D),N1,N,68,-22.7,-47.0,5,38,1,0,8,0,0,N/A for summer
+KIBY_G,Kirkby (_G),N1,N,18,-5.4,-11.2,2,33,0,0,3,0,0,N/A for summer
+KIRKB1,Kirkstall B,P1,P,87,37.4,-26.1,2,36,4,0,21,0,0,N/A for summer
+KITW_1,Kitwell,L2,L,121,124.4,-99.5,3,53,0,0,10,0,0,N/A for summer
+KNAR,Knaresborough,P2,P,57,74.8,74.8,7,108,22,0,76,0,0,N/A for summer
+LACK_6,Lackenby,Q2,Q,95,20.9,-29.9,8,80,71,0,37,0,0,N/A for summer
+LAIR_P,Lairg,T5,T,9,-0.1,-2.5,0,7,8,6,0,0,0,N/A for summer
+LALE1SG003,Laleham,A6,A,125,-5.7,-68.2,1,23,0,0,27,0,0,N/A for summer
+LAND1,Landulph,F6,F,90,-17.3,-28.5,32,412,9,6,171,0,0,N/A for summer
+LEGA_1,Legacy,M4,M,133,9.1,-3.2,7,250,186,2,48,0,0,N/A for summer
+LEVE,Leven,S5,S,18,22.6,21.1,1,17,21,0,20,0,0,N/A for summer
+LINM,Linnmill,S6,S,53,2.4,-7.0,21,20,86,26,6,0,0,N/A for summer
+LISD_1,Lister Drive,N1,N,136,-55.1,-95.7,44,65,25,0,59,0,0,N/A for summer
+LITT_C,Littlebrook (_C),A8,A,44,0.5,-17.7,9,25,1,0,14,0,0,N/A for summer
+LITT_J,Littlebrook (_J),A8,A,5,-0.3,-1.1,0,7,0,0,2,0,0,N/A for summer
+LING,Livingston East,S6,S,58,20.3,8.3,1,13,85,0,5,0,0,N/A for summer
+LODR_6,Lodge Road,A7,A,114,61.5,-55.6,0,10,0,0,3,0,0,N/A for summer
+LOUD_H,Loudwater,A6,A,15,4.1,-3.2,1,15,0,0,2,0,0,N/A for summer
+LOVE_1,Lovedean,B2,B,214,-100.0,-172.4,11,536,23,0,79,0,0,N/A for summer
+LUNA_P,Lunanhead,T4,T,12,1.0,-0.6,11,46,6,2,7,0,0,N/A for summer
+LYND_P,Lyndhurst,T4,T,8,-0.9,-1.5,0,3,2,0,1,0,0,N/A for summer
+MACC_3,Macclesfield,N6,N,25,-3.4,-3.4,20,39,0,0,62,0,0,N/A for summer
+MACD_P,Macduff,T1,T,0,0.0,-0.4,1,29,59,0,1,0,0,N/A for summer
+MANN_1,Mannington,E1,E,242,-63.1,-90.2,184,879,7,0,104,0,0,N/A for summer
+MAGA_6,Margam,H1,H,51,41.2,40.3,19,27,153,0,2,0,0,N/A for summer
+MAYB,Maybole,S6,S,34,5.6,1.6,0,6,2,1,20,0,0,N/A for summer
+MELK_1,Melksham,G6,G,171,-11.1,-34.8,215,1034,17,0,225,0,0,N/A for summer
+MILH_1,Mill Hill,A6,A,73,-45.1,-79.7,1,17,0,1,7,0,0,N/A for summer
+MILC_P,Milton of Craigie,T4,T,18,-2.0,-2.1,1,17,8,1,15,0,0,N/A for summer
+MITY_1,Minety,G6,G,126,-18.9,-37.4,232,773,16,6,28,0,0,N/A for summer
+MYBS_P,Mybster,T5,T,12,-0.9,-1.7,0,14,31,0,1,0,0,N/A for summer
+NAIR_P,Nairn,T1,T,14,6.6,3.3,1,10,3,0,2,0,0,N/A for summer
+NECE_1,Nechells,L3,L,137,71.2,-27.9,5,95,0,0,92,0,0,N/A for summer
+NEEP_3,Neepsend,P3,P,27,1.7,-2.8,1,23,0,0,8,0,0,N/A for summer
+NEWX_6,New Cross,A4,A,147,84.7,-4.8,2,34,0,0,46,0,0,N/A for summer
+NEAR,Newarthill,S6,S,29,2.0,-1.1,0,5,5,0,13,0,0,N/A for summer
+NETS,Newton Stewart,S6,S,7,0.2,-0.9,0,1,0,0,1,0,0,N/A for summer
+NINF_1,Ninfield,B1,B,147,21.6,-38.3,109,293,102,0,38,0,0,N/A for summer
+NHYD_6,North Hyde,A6,A,72,36.3,-0.3,2,25,0,0,3,0,0,N/A for summer
+NFLE,Northfleet East,C2,C,158,13.1,-63.1,106,235,0,0,47,0,0,N/A for summer
+NORT_1,Norton,Q4,Q,166,-5.1,-68.5,108,228,45,1,120,0,0,N/A for summer
+NORL_3,Norton Lees,P3,P,17,-3.2,-6.3,0,14,0,0,1,0,0,N/A for summer
+NORM_1,Norwich Main,J3,J,10,-5.1,-27.2,24,941,103,0,38,0,0,N/A for summer
+NURS_1,Nursling,B2,B,140,16.4,-26.4,135,311,0,9,67,0,0,N/A for summer
+OCKH_1,Ocker Hill,L2,L,39,14.2,-3.5,1,30,0,0,16,0,0,N/A for summer
+OFFE_3,Offerton,Q4,Q,20,0.2,-4.5,1,18,0,0,5,0,0,N/A for summer
+OLDB_1,Oldbury,L2,L,39,5.0,-20.6,2,37,0,0,50,0,0,N/A for summer
+ORMO,Ormonde,R5,R,90,0.0,0.0,0,0,0,0,1,0,0,N/A for summer
+ORRI_P,Orrin,T1,T,0,0.0,0.0,0,0,1,0,0,0,0,N/A for summer
+OSBA_1,Osbaldwick,P6,P,109,-48.6,-51.0,65,142,5,9,38,0,0,N/A for summer
+PADIB1,Padiham,N5,N,103,-24.2,-24.2,3,75,41,0,27,0,0,N/A for summer
+PAIS,Paisley,S6,S,14,-1.2,-4.8,0,1,0,0,1,0,0,N/A for summer
+PART,Partick,S5,S,15,-0.5,-2.2,0,1,0,0,1,0,0,N/A for summer
+PELH_1,Pelham,D5,D,78,-16.9,-29.4,86,367,1,0,33,0,0,N/A for summer
+PEMB_1,Pembroke,H6,H,80,38.4,-10.3,4,473,23,1,18,0,0,N/A for summer
+PENN_1,Penn,L1,L,84,32.7,-27.7,1,11,0,0,69,0,0,N/A for summer
+PENT_1,Pentir,M6,M,35,-9.5,-9.5,3,196,68,6,6,0,0,N/A for summer
+PENE_1,Penwortham East,R4,R,126,-30.2,-32.4,156,93,46,0,208,0,0,N/A for summer
+PENW_1,Penwortham West,R4,R,34,-25.8,-25.9,63,127,13,0,122,0,0,N/A for summer
+PERI_H,Perivale,A7,A,17,-1.7,-7.4,0,4,0,0,1,0,0,N/A for summer
+PERS_P,Persley,T2,T,16,-1.4,-4.4,0,12,2,0,5,0,0,N/A for summer
+PEHG_P,Peterhead Grange,T2,T,16,-1.5,-2.9,2,0,0,0,0,0,0,N/A for summer
+PEHS_P,Peterhead Shell,T2,T,4,-0.2,-0.3,2,22,17,0,2,0,0,N/A for summer
+PITS_3,Pitsmoor,P3,P,22,7.5,3.5,1,19,0,0,1,0,0,N/A for summer
+POPP_3,Poppleton,P2,P,16,-3.4,-3.4,1,30,5,0,4,0,0,N/A for summer
+PORA_P,Port Ann,T3,T,3,3.8,3.0,0,20,23,15,2,0,0,N/A for summer
+PORD,Port Dundas,S5,S,14,3.5,0.3,0,13,0,0,5,0,0,N/A for summer
+POOB,Portobello,S6,S,30,11.6,6.6,1,9,9,0,28,0,0,N/A for summer
+PYLE_1,Pyle,H1,H,78,23.8,21.6,2,100,73,0,48,0,0,N/A for summer
+QUOI_P,Quoich,T1,T,0,0.3,0.3,0,2,0,0,0,0,0,N/A for summer
+RAIN_1,Rainhill,N1,N,174,-31.3,-86.8,3,53,2,0,72,0,0,N/A for summer
+RANN_P,Rannoch,T4,T,0,7.2,6.2,0,8,0,20,1,0,0,N/A for summer
+RASS_1,Rassau,H6,H,67,20.5,-15.0,5,312,32,10,132,0,0,N/A for summer
+RATS_1,Ratcliffe,L7,L,189,-52.8,-85.0,30,237,17,0,112,0,0,N/A for summer
+RAVE,Ravenscraig,S6,S,13,-3.8,-4.5,0,0,0,0,20,0,0,N/A for summer
+RAYL_1,Rayleigh,C5,C,138,-0.7,-100.6,158,329,91,0,43,0,0,N/A for summer
+REBR_3,Redbridge,A1,A,44,20.8,-8.6,1,17,0,0,3,0,0,N/A for summer
+REDH,Redhouse,S5,S,14,5.7,2.9,0,56,34,0,6,0,0,N/A for summer
+REDM_P,Redmoss,T2,T,51,5.7,3.0,0,11,21,0,4,0,0,N/A for summer
+RICH_J,Richborough,C7,C,19,1.8,-5.4,3,195,0,0,8,0,0,N/A for summer
+RRIG,Robin Rigg,Q8,Q,86,0.4,0.1,0,0,0,0,6,0,0,N/A for summer
+ROCH_1,Rochdale,N4,N,29,10.8,-5.8,174,61,170,0,14,0,0,N/A for summer
+RUGEB1,Rugeley,L5,L,68,-6.2,-39.0,2,103,3,0,3,0,0,N/A for summer
+RYEH_1,Rye House,A9,A,171,99.7,-5.7,4,108,0,0,32,0,0,N/A for summer
+SALT_1,Saltend North,P8,P,47,16.0,3.0,5,63,55,0,44,0,0,N/A for summer
+SALH_1,Saltholme,Q2,Q,83,28.1,2.5,0,35,0,0,422,0,0,N/A for summer
+SEAB1,Seabank,G7,G,133,-20.7,-24.1,7,340,37,0,114,0,0,N/A for summer
+SELL_1,Sellindge,C4,C,122,132.3,37.2,5,281,0,0,16,0,0,N/A for summer
+SHEC_3,Sheffield City,P3,P,31,5.3,-0.1,0,11,0,0,5,0,0,N/A for summer
+SALL1,Sheringham Shoal,J3,J,255,62.6,11.4,0,0,0,0,7,0,0,N/A for summer
+SHIN_P,Shin,T5,T,6,0.9,0.4,0,1,0,2,0,0,0,N/A for summer
+SHRW_1,Shrewsbury,L5,L,61,-5.9,-10.0,6,259,5,0,29,0,0,N/A for summer
+SHRU,Shrubhill,S6,S,25,0.2,-3.9,0,1,0,0,0,0,0,N/A for summer
+SIGH,Sighthill,S6,S,41,0.8,-5.6,1,10,0,0,6,0,0,N/A for summer
+SKLGB1,Skelton Grange,P1,P,221,81.5,-87.5,8,135,2,0,104,0,0,N/A for summer
+SLOY_P,Sloy,T3,T,13,4.0,3.9,0,1,0,0,0,0,0,N/A for summer
+SMAN_1,South Manchester,N2,N,146,152.5,-57.5,20,55,0,0,57,0,0,N/A for summer
+SSHI_3,South Shields,Q4,Q,15,0.1,-3.3,37,32,0,0,1,0,0,N/A for summer
+SPAV,Spango Valley,S6,S,14,13.4,10.9,0,3,1,0,1,0,0,N/A for summer
+SPEN_1,Spennymoor,Q7,Q,68,-20.4,-34.8,28,112,109,1,33,0,0,N/A for summer
+SANX,St Andrews Cross,S6,S,14,-4.8,-6.2,0,0,0,0,0,0,0,N/A for summer
+SFEG_P,St Fergus Gas Terminal,T2,T,3,4.3,3.4,5,9,26,0,0,0,0,N/A for summer
+SFIL_P,St Fillans,T4,T,0,6.9,6.1,0,4,0,8,0,0,0,N/A for summer
+SJOW_1,St John's Wood,A7,A,310,157.5,-40.5,0,11,0,0,27,0,0,N/A for summer
+SASA,St. Asaph,M6,M,2,0.0,0.0,0,0,0,0,3,0,0,N/A for summer
+STAL_1,Stalybridge,N7,N,140,-17.7,-20.8,43,94,0,0,82,0,0,N/A for summer
+STAH_1,Stanah,R4,R,22,-16.7,-17.1,2,66,1,0,6,0,0,N/A for summer
+STAY_1,Staythorpe,K5,K,103,-2.1,-32.7,6,553,8,0,35,0,0,N/A for summer
+STEN_1,Stella North,Q5,Q,81,23.2,5.4,2,53,0,0,44,0,0,N/A for summer
+STES_1,Stella South,Q5,Q,95,-36.6,-56.5,5,102,40,0,13,0,0,N/A for summer
+STIR,Stirling,S5,S,42,2.6,-2.6,2,41,32,0,16,0,0,N/A for summer
+SBAR,Stoke Bardolph,L7,L,57,-25.0,-33.2,5,171,5,1,56,0,0,N/A for summer
+STHA,Strathaven,S6,S,18,8.5,3.4,0,6,20,0,0,0,0,N/A for summer
+STLE,Strathleven,S5,S,7,9.3,4.7,1,22,0,3,3,0,0,N/A for summer
+STRI_P,Strichen,T2,T,1,0.0,-0.1,0,29,28,0,1,0,0,N/A for summer
+SUND_1,Sundon,D4,D,201,27.2,-83.1,67,375,9,0,98,0,0,N/A for summer
+SWAN_1,Swansea North,H6,H,201,29.1,-26.8,58,621,354,13,92,0,0,N/A for summer
+TARL_P,Tarland,T2,T,3,2.7,1.9,0,24,13,3,3,0,0,N/A for summer
+TAUN1,Taunton,E8,E,46,-7.4,-7.4,34,202,0,0,28,0,0,N/A for summer
+TAYN_P,Taynuilt,T3,T,7,0.5,-0.1,0,19,14,30,1,0,0,N/A for summer
+TELR,Telford Road,S6,S,10,1.4,-0.8,0,4,0,0,0,0,0,N/A for summer
+TEMP_3,Templeborough,P3,P,3,14.3,13.9,0,9,0,0,1,0,0,N/A for summer
+THOM_6,Thorpe Marsh,P6,P,36,-6.0,-6.5,9,205,2,0,20,0,0,N/A for summer
+THUR_6,Thurcroft,P3,P,62,0.0,-5.8,53,58,35,0,78,0,0,N/A for summer
+THSO_P,Thurso,T5,T,19,-10.4,-13.7,4,37,94,0,39,0,0,N/A for summer
+TILBB_1,Tilbury,C1,C,63,24.5,13.2,30,165,13,0,60,0,0,N/A for summer
+TONG,Tongland,S6,S,9,-1.2,-1.2,1,10,6,1,1,0,0,N/A for summer
+TOTT_1,Tottenham,A1,A,105,51.8,-66.2,2,30,0,0,59,0,0,N/A for summer
+TRAW_1,Trawsfynydd,M7,M,85,-17.2,-17.2,2,77,220,12,9,0,0,N/A for summer
+TUMB_P,Tummel Bridge,T4,T,1,19.3,17.9,0,7,1,19,1,0,0,N/A for summer
+TYNE_1,Tynemouth 1,Q4,Q,52,5.8,-40.0,14,9,0,0,2,0,0,N/A for summer
+TYNE_2,Tynemouth 2,Q4,Q,10,-5.2,-5.7,28,56,0,0,35,0,0,N/A for summer
+UPPB_1,Upper Boat 132kV,H2,H,78,-1.6,-8.4,4,100,92,1,128,0,0,N/A for summer
+UPPB_3,Upper Boat 33kV,H2,H,7,0.4,-0.4,0,38,0,0,5,0,0,N/A for summer
+USKM_1,Uskmouth,H2,H,119,-11.3,-31.6,26,310,39,0,53,0,0,N/A for summer
+WALH_1,Walham,G1,G,171,136.5,73.4,7,266,0,0,57,0,0,N/A for summer
+WABO,Walney 2,R4,R,116,2.6,0.5,0,0,0,0,4,0,0,N/A for summer
+WALP_1,Walpole (_A),J1,J,219,-11.3,-40.5,15,611,300,0,153,0,0,N/A for summer
+WALP_B,Walpole (_B),J1,J,47,0.1,-8.6,9,347,28,0,107,0,0,N/A for summer
+WARL_1,Warley,C6,C,65,88.9,-20.2,111,149,2,0,53,0,0,N/A for summer
+WASF_1,Washway Farm,N1,N,56,16.1,-1.3,70,17,3,0,81,0,0,N/A for summer
+WATFS_1,Watford South,A6,A,119,54.0,-18.6,3,47,0,0,10,0,0,N/A for summer
+WBOL_6,West Boldon,Q4,Q,77,20.9,4.0,10,69,9,0,7,0,0,N/A for summer
+WBUR_1,West Burton,K6,K,70,-4.5,-6.9,17,303,4,0,43,0,0,N/A for summer
+WGEO,West George Street,S5,S,21,-2.7,-5.3,0,0,0,0,0,0,0,N/A for summer
+WHAM_1,West Ham,A1,A,140,28.0,-155.8,4,29,0,0,16,0,0,N/A for summer
+WMEL_1,West Melton,P3,P,241,-29.2,-68.5,95,86,108,2,193,0,0,N/A for summer
+WTHU31,West Thurrock,A1,A,25,15.4,2.8,1,13,0,0,15,0,0,N/A for summer
+WWEY_1,West Weybridge,A8,A,138,17.6,-41.3,11,81,0,0,14,0,0,N/A for summer
+WFIE,Westfield,S5,S,10,-2.7,-4.0,0,14,28,0,8,0,0,N/A for summer
+WHGA_1,Whitegate,N4,N,99,55.0,-38.8,24,73,0,0,79,0,0,N/A for summer
+WHHO,Whitehouse,S6,S,20,1.5,-1.6,0,4,0,0,1,0,0,N/A for summer
+WIEN_1,Willenhall,L2,L,42,18.2,-16.7,11,57,0,0,39,0,0,N/A for summer
+WISD_1,Willesden 132kV,A7,A,99,26.0,-37.7,0,7,0,0,3,0,0,N/A for summer
+WISD_6,Willesden 66kV,A7,A,26,-2.1,-10.4,0,11,0,0,6,0,0,N/A for summer
+WILL_1,Willington,L5,L,239,94.0,41.8,10,236,33,1,166,0,0,N/A for summer
+WIOW_P,Willowdale,T2,T,12,-2.3,-3.4,0,1,0,3,0,0,0,N/A for summer
+WIMBN1,Wimbledon North,A4,A,42,2.0,-22.6,0,16,0,0,6,0,0,N/A for summer
+WIMBS1,Wimbledon South,A4,A,192,8.9,-105.9,2,50,0,0,24,0,0,N/A for summer
+WIBA_3,Wincobank,P3,P,0,-0.3,-2.0,0,9,0,0,28,0,0,N/A for summer
+WISH,Wishaw,S6,S,21,6.1,0.5,1,13,30,0,1,0,0,N/A for summer
+WOHI_P,Woodhill,T2,T,14,-2.3,-2.8,1,10,0,0,1,0,0,N/A for summer
+WYLF_1,Wylfa,M8,M,24,47.0,2.7,1,126,57,0,5,0,0,N/A for summer
+WYMOM_1,Wymondley,D5,D,84,19.8,-34.6,59,155,30,0,16,0,0,N/A for summer
+G_EXTRA_1,Dumfries 11,S6,S,0,0.0,0.0,0,6,0,0,2,0,0,N/A for summer
+G_EXTRA_2,Dumfries 33,S6,S,31,16.0,9.3,0,7,27,0,3,0,0,N/A for summer
+G_EXTRA_3,Dumfries ICI,S6,S,8,-0.6,-2.5,0,6,0,0,2,0,0,N/A for summer
+G_EXTRA_4,Grangemouth A,S6,S,19,1.4,-1.2,0,5,1,0,21,0,0,N/A for summer
+G_EXTRA_5,Grangemouth C,S6,S,11,2.7,0.5,0,6,1,0,1,0,0,N/A for summer
+G_EXTRA_6,Kilbowie 11,S5,S,1,-2.7,-2.7,0,3,0,0,0,0,0,N/A for summer
+G_EXTRA_7,Kilbowie 33,S5,S,11,3.5,1.9,0,12,0,0,0,0,0,N/A for summer
+G_EXTRA_8,Saltcoats A,S6,S,36,8.2,1.6,0,7,77,1,1,0,0,N/A for summer
+G_EXTRA_9,Saltcoats B,S6,S,6,-0.7,-2.9,0,8,65,1,5,0,0,N/A for summer
+G_EXTRA_10,Crookston A,S6,S,6,1.2,-1.8,0,2,2,0,1,0,0,N/A for summer
+G_EXTRA_11,Crookston B,S6,S,9,-0.1,-3.7,0,3,34,0,1,0,0,N/A for summer
+G_EXTRA_12,Shetland,T5,T,0,0.0,0.0,0,0,70,0,13,0,0,N/A for summer
+ROTI3,Rothienorman,T2,T,4,0.3,0.3,10,0,49,0,0,0,0,N/A for summer
+G_EXTRA_14,Finstown,T5,T,0,0.0,0.0,0,0,0,0,0,0,0,N/A for summer
+G_EXTRA_15,Lesmahagow,S6,S,8,0.4,0.4,0,0,58,0,0,0,0,N/A for summer
+G_EXTRA_16,Moffat,S6,S,1,100.1,100.1,0,0,0,0,0,0,0,N/A for summer
+DUNB_A,Dunbar A,S6,S,17,3.1,3.1,0,0,0,0,0,0,0,N/A for summer
+DUNB_B,Dunbar B ,S6,S,7,1.3,1.3,1,9,22,0,5,0,0,N/A for summer
+T_ELSTR-1,Elstree NR,A6,A,11,3.3,3.3,0,0,0,0,0,0,0,N/A for summer
+T_BUSH_RTK,Bushey NR,A6,A,19,7.7,7.7,0,0,0,0,0,0,0,N/A for summer
+T_CORM_RTK,Correy's Mill NR,D5,D,24,9.8,9.8,0,0,0,0,0,0,0,N/A for summer
+T_LBUZ_RTK,LEIGHTON BUZZARD NR,D4,D,31,12.7,12.7,0,0,0,0,0,0,0,N/A for summer
+T_LONGB-RTK,Long Buckby Wharf NR,L3,L,19,7.5,7.5,0,0,0,0,0,0,0,N/A for summer
+T_PATB_RTK,Patford Bridge NR,L3,L,10,4.1,4.1,0,0,0,0,0,0,0,N/A for summer
+M_ACTLLU_C,LU Acton Lane Supply,A7,A,10,4.2,4.2,0,0,0,0,0,0,0,N/A for summer
+T_BARK-CTRL,Barking Chnl Tunnel RLink,A1,A,32,13.0,13.0,0,0,0,0,0,0,0,N/A for summer
+T_BARK_NR,Barking NR,A1,A,5,2.1,2.1,0,0,0,0,0,0,0,N/A for summer
+T_ANGLD-1,Anglesey Aluminium Demand,M8,M,0,0.0,0.0,0,0,0,0,0,0,0,N/A for summer
+T_FROD_NR,Frodsham NR,N3,N,11,4.2,4.2,0,0,0,0,0,0,0,N/A for summer
+T_CASKD-1,Castner Kellner,N3,N,117,34.0,34.0,0,0,0,0,0,0,0,N/A for summer
+T_BRER_RTK,Brereton NR,L5,L,21,8.4,8.4,0,0,0,0,0,0,0,N/A for summer
+T_POPP_3RTK,Poppleton NR,P2,P,4,1.8,1.8,0,0,0,0,0,0,0,N/A for summer
+T_WILCT-1,ETOL - Wilton Site,Q2,Q,2,0.7,0.7,0,0,0,0,0,0,0,N/A for summer
+M_GRTO,BS Grangetown Supply,Q2,Q,7,2.2,2.2,0,0,0,0,0,0,0,N/A for summer
+T_TODSD-1,BS Tod Point Supply,Q2,Q,8,2.4,2.4,0,0,0,0,0,0,0,N/A for summer
+T_HARK_NR,Harker NR,Q8,Q,6,2.6,2.6,0,0,0,0,0,0,0,N/A for summer
+T_OXEN_NR,Oxenholme NR,R6,R,10,4.0,4.0,0,0,0,0,0,0,0,N/A for summer
+T_FOXJD-1,Didcot - Foxhall 1,D6,D,7,2.7,2.7,0,0,0,0,0,0,0,N/A for summer
+T_FOXJD-2,Didcot - Foxhall 2,D6,D,0,0.0,0.0,0,0,0,0,0,0,0,N/A for summer
+T_GLNG,Grain LNG Terminal,C3,C,13,3.8,3.8,0,0,0,0,0,0,0,N/A for summer
+T_SELL-1,Sellindge NR,C4,C,18,7.1,7.1,0,0,0,0,0,0,0,N/A for summer
+T_SINGL1,Singlewell NR,C2,C,11,4.3,4.3,0,0,0,0,0,0,0,N/A for summer
+T_BAGED-1,Baglan Energy Park,H1,H,9,2.5,2.5,0,0,0,0,0,0,0,N/A for summer
+T_LLWSD-1,Llanwern Steelworks,H2,H,17,5.0,5.0,0,0,0,0,0,0,0,N/A for summer
+T__KYELT003,ASW Tremorfa,H2,H,66,19.3,19.3,0,0,0,0,0,0,0,N/A for summer
+T__MYELT001,Corus Aldwarke,P3,P,72,20.9,20.9,0,0,0,0,0,0,0,N/A for summer
+M_TEMP,BOC Brinsworth Supply,P3,P,19,5.5,5.5,0,0,0,0,0,0,0,N/A for summer
+T_TINSD-1,Tinsley Park Steelworks,P3,P,42,12.4,12.4,0,0,0,0,0,0,0,N/A for summer
+T_KSGND-1,Kensal Green Crossrail,A7,A,0,0.0,0.0,0,0,0,0,0,0,0,N/A for summer
+T_KSGND-2,Kensal Green Crossrail,A7,A,0,0.0,0.0,0,0,0,0,0,0,0,N/A for summer
+T__HYELT002,UKAEA Culham Jet,D6,D,0,0.0,0.0,0,0,0,0,0,0,0,N/A for summer
+T_THNJD-1,Thingley Junction 1,G6,G,0,0.0,0.0,0,0,0,0,0,0,0,N/A for summer
+T_THNJD-2,Thingley Junction 2,G6,G,0,0.0,0.0,0,0,0,0,0,0,0,N/A for summer
+T_SGGLD-1,Saint Gobain,P6,P,0,0.0,0.0,0,0,0,0,0,0,0,N/A for summer
+T_RYHAD-1,Essendine 1,J7,J,2,0.7,0.7,0,0,0,0,0,0,0,N/A for summer
+T_RYHAD-2,Essendine 2,J7,J,0,0.0,0.0,0,0,0,0,0,0,0,N/A for summer
+T_PUDMD-1,Pudding Mill Lane 1,A1,A,0,0.0,0.0,0,0,0,0,0,0,0,N/A for summer
+T_PUDMD-2,Pudding Mill Lane 2,A1,A,0,0.0,0.0,0,0,0,0,0,0,0,N/A for summer
+T_HPC-CES,HPC construction supply,E7,E,0,0.0,0.0,0,0,0,0,0,0,0,N/A for summer
+T_ALUKD-1,Air Liquide,P6,P,0,0.0,0.0,0,0,0,0,0,0,0,N/A for summer
+T_BPGRD-1,Grangemouth B (BP),S6,S,87,59.6,59.6,0,0,0,0,0,0,0,N/A for summer
+T_BPGRD-2,Grangemouth B (BP),S6,S,0,0.0,0.0,0,0,0,0,0,0,0,N/A for summer
+T_MEADD-1,Meadowhead (Caledonian Paper),S6,S,20,6.3,6.3,0,0,0,0,0,0,0,N/A for summer
+T_EXMOSSD-1,Mossmoran Exxon,S5,S,13,8.0,8.0,0,0,0,0,0,0,0,N/A for summer
+T_WHISTLD-1,MOD Harestanes Whistlefield,S5,S,25,6.5,6.5,0,0,0,0,0,0,0,N/A for summer
+T_BAGTD-1,Bathgate (Network Rail),S5,S,4,1.1,1.1,0,0,0,0,0,0,0,N/A for summer
+T_DALRD-1,Dalreoch (Network Rail),S5,S,5,3.1,3.1,0,0,0,0,0,0,0,N/A for summer
+T_ECCFD-1,Ecclefechan (Network Rail),S6,S,3,0.4,0.4,0,0,0,0,0,0,0,N/A for summer
+T_EGLSD-1,Eglington  Street (Network Rail),S6,S,9,1.7,1.7,0,0,0,0,0,0,0,N/A for summer
+T_ELVAD-1,Elvanfoot (Network Rail),S6,S,5,1.8,1.8,0,0,0,0,0,0,0,N/A for summer
+T_GOWKD-1,Gowkthrapple (Network Rail),S6,S,8,0.8,0.8,0,0,0,0,0,0,0,N/A for summer
+T_INWID-1,Innerwick (Network Rail),S6,S,3,2.2,2.2,0,0,0,0,0,0,0,N/A for summer
+T_MARMD-1,Marshall Meadows (Network Rail),S6,S,3,1.7,1.7,0,0,0,0,0,0,0,N/A for summer
+T_MOSED-1,Mossmorran Shell,S5,S,21,11.7,11.7,0,0,0,0,0,0,0,N/A for summer
+T_PARHD-1,Carntyne / Parkhead (Network Rail),S6,S,4,2.4,2.4,0,0,0,0,0,0,0,N/A for summer
+T_POOBD-1,Portobello (Network Rail),S6,S,4,2.2,2.2,0,0,0,0,0,0,0,N/A for summer
+T_PORGD-1,Port Glasgow (Network Rail),S6,S,2,0.3,0.3,0,0,0,0,0,0,0,N/A for summer
+T_SACOD-1,Saltcoats / South Beach (Network Rail),S6,S,4,0.3,0.3,0,0,0,0,0,0,0,N/A for summer
+T_GNHLD-1,Bonnybridge (Network Rail),S5,S,0,0.0,0.0,0,0,0,0,0,0,0,N/A for summer
+T_GNHLD-2,Bonnybridge (Network Rail),S5,S,0,0.0,0.0,0,0,0,0,0,0,0,N/A for summer
+T_GNHLD-3,Bonnybridge (Network Rail),S5,S,0,0.0,0.0,0,0,0,0,0,0,0,N/A for summer
+T_CHAPD-1,Chapelcross Directs,S6,S,0,0.0,0.0,0,0,0,0,0,0,0,N/A for summer
+T_RAVED-1,Ravenscraig B (BSC),S6,S,3,0.4,0.4,0,0,0,0,0,0,0,N/A for summer
+T_SFGSD-1,St Fergus Compressor,T2,T,25,16.5,16.5,0,0,0,0,0,0,0,N/A for summer
+T_SFGSD-2,St Fergus Compressor,T2,T,21,13.9,13.9,0,0,0,0,0,0,0,N/A for summer
+T_STFERGD-1,St. Fergus Mobil,T2,T,8,2.7,2.7,0,0,0,0,0,0,0,N/A for summer
+B_EXTRA_2,Hydrogen-SMR-1,T2,T,0,0.1,0.1,0,0,0,0,0,0,0,N/A for summer
+B_EXTRA_3,Hydrogen-SMR-2,P6,P,0,0.0,0.0,0,0,0,0,0,0,0,N/A for summer
+B_EXTRA_4,Hydrogen-SMR-3,N3,N,0,0.0,0.0,0,0,0,0,0,0,0,N/A for summer
+B_EXTRA_5,Hydrogen-SMR-4,P8,P,0,0.0,0.0,0,0,0,0,0,0,0,N/A for summer
+B_EXTRA_6,Hydrogen-SMR-5,C4,C,0,0.0,0.0,0,0,0,0,0,0,0,N/A for summer
+B_EXTRA_7,Hydrogen-SMR-6,P4,P,0,0.0,0.0,0,0,0,0,0,0,0,N/A for summer
+B_EXTRA_8,Hydrogen-SMR-7,S6,S,0,0.0,0.0,0,0,0,0,0,0,0,N/A for summer
+B_EXTRA_9,Hydrogen-SMR-8,S5,S,5,1.5,1.5,0,0,0,0,0,0,0,N/A for summer
+B_EXTRA_10,Currie Feeder Station NR,S6,S,0,0.0,0.0,0,0,0,0,0,0,0,N/A for summer
+T_NWCRS-1,New Cross 1,A4,A,0,0.0,0.0,0,0,0,0,0,0,0,N/A for summer
+T_NWCRS-2,New Cross 2,A4,A,0,0.0,0.0,0,0,0,0,0,0,0,N/A for summer
+T_IMPRK-1,Imperial Park 1,H6,H,0,0.0,0.0,0,0,0,0,0,0,0,N/A for summer
+T_IMPRK-2,Imperial Park 2,H6,H,0,0.0,0.0,0,0,0,0,0,0,0,N/A for summer
+T_SNDND-1,Sundon 1,D4,D,0,0.0,0.0,0,0,0,0,0,0,0,N/A for summer
+T_SNDND-2,Sundon 2,D4,D,0,0.0,0.0,0,0,0,0,0,0,0,N/A for summer
+T_STBRD-1,Stalybridge,N7,N,0,0.0,0.0,0,0,0,0,0,0,0,N/A for summer
+T_STBRD-2,Stalybridge,N7,N,0,0.0,0.0,0,0,0,0,0,0,0,N/A for summer
+B_EXTRA_63,Cardiff Airport 132 (Data_centre),H2,H,130,37.9,37.9,0,0,0,0,0,0,0,N/A for summer
+B_EXTRA_64,Waltham Cross 275 (Data_centre),A3,A,100,29.2,29.2,0,0,0,0,0,0,0,N/A for summer
+B_EXTRA_65,Iver B 132 (Data_centre),A6,A,85,24.8,24.8,0,0,0,0,0,0,0,N/A for summer
+B_EXTRA_66,Brimsdown 132 (Data_centre),A3,A,100,29.2,29.2,0,0,0,0,0,0,0,N/A for summer
+B_EXTRA_67,North Hyde 66 (Data_centre),A6,A,150,43.8,43.8,0,0,0,0,0,0,0,N/A for summer
+B_EXTRA_68,Iver B 132 (Data_centre),A6,A,75,21.9,21.9,0,0,0,0,0,0,0,N/A for summer
+B_EXTRA_69,Didcot A (Data_centre),D6,D,130,37.9,37.9,0,0,0,0,0,0,0,N/A for summer
+B_EXTRA_70,Elstree 132 (Data_centre),A6,A,250,72.9,72.9,0,0,0,0,0,0,0,N/A for summer
+B_EXTRA_71,Didcot B (Data_centre),D6,D,300,87.5,87.5,0,0,0,0,0,0,0,N/A for summer
+B_EXTRA_72,Iver B 132 (Data_centre),A6,A,120,35.0,35.0,0,0,0,0,0,0,0,N/A for summer
+B_EXTRA_73,Iver B 132 (Data_centre),A6,A,100,29.2,29.2,0,0,0,0,0,0,0,N/A for summer
+B_EXTRA_74,Berkswell (Rail),L3,L,125,36.5,36.5,0,0,0,0,0,0,0,N/A for summer
+B_EXTRA_75,Ickenham (new) (Rail),D4,D,125,36.5,36.5,0,0,0,0,0,0,0,N/A for summer
+B_EXTRA_76,Quainton (new) (Rail),A6,A,125,36.5,36.5,0,0,0,0,0,0,0,N/A for summer
+B_EXTRA_77,Parkgate (Rail),L5,L,63,18.2,18.2,0,0,0,0,0,0,0,N/A for summer
+B_EXTRA_78,Parkgate (Rail),L5,L,63,18.2,18.2,0,0,0,0,0,0,0,N/A for summer
+B_EXTRA_79,Upper Boat 275 (Rail),H2,H,88,25.7,25.7,0,0,0,0,0,0,0,N/A for summer
+B_EXTRA_80,Staythorpe 132 (N_Rail),K5,K,14,4.1,4.1,0,0,0,0,0,0,0,N/A for summer
+B_EXTRA_81,Wymondley 400 (N_Rail),D5,D,0,0.0,0.0,0,0,0,0,0,0,0,N/A for summer
+B_EXTRA_82,Bramley 400 (N_Rail),B4,B,68,19.8,19.8,0,0,0,0,0,0,0,N/A for summer
+B_EXTRA_83,Dingley Wood 400 (N_Rail),L3,L,92,27.0,27.0,0,0,0,0,0,0,0,N/A for summer
+B_EXTRA_84,Hasland (New) (N_Rail),P3,P,14,4.1,4.1,0,0,0,0,0,0,0,N/A for summer
+B_EXTRA_85,Kegworth (New) (N_Rail),L7,L,45,13.1,13.1,0,0,0,0,0,0,0,N/A for summer
+B_EXTRA_86,Laleham 275 (N_Rail),A6,A,28,8.2,8.2,0,0,0,0,0,0,0,N/A for summer
