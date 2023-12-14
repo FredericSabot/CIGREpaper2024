@@ -101,19 +101,19 @@ year = 2031
 print('Study Year: %s' %year)
 
 # TODO: define scenarios
-scenario = 1
-if scenario == 1:  # Summer minimum AM Leading the way  # TODO: PM instead
+scenario = 2
+if scenario == 1:  # Summer minimum PM Leading the way
     SCOTLAND_WIND_AVAILABILITY = 0.8
-    NGET_WIND_AVAILABILITY = 0.8
-    SCOTLAND_LOAD = 2597
-    EW_load = 25584  # England and Wales
-    DER_SHARE = 0.4
+    NGET_WIND_AVAILABILITY = 0.8 * 0.58
+    SCENARIO_NAME = 'SummerPM_30_leading'
+    SOLAR_FACTOR = 0.68  # All-time peak according to https://www.solar.sheffield.ac.uk/pvlive/ (checked on 14/12/2023, peak reached on 2023-04-20 12:30PM which is not really in the summer)
+    CHP_FACTOR = 0.2
 elif scenario == 2:  # Winter peak Leading the way
     SCOTLAND_WIND_AVAILABILITY = 0.8
-    NGET_WIND_AVAILABILITY = 0.8
-    SCOTLAND_LOAD = 5574
-    EW_load = 57179
-    DER_SHARE = 0.4
+    NGET_WIND_AVAILABILITY = 0.8 * 0.7
+    SCENARIO_NAME = 'Winter_30_leading'
+    SOLAR_FACTOR = 0  # Winter evening
+    CHP_FACTOR = 0.7
 
 
 # Activate the necessary network variations for the considered year
@@ -138,16 +138,29 @@ loads = [load for load in loads if load.loc_name != 'HVDC NET IC']  # HVDC inter
 dispatchable_loads = [load for load in loads if load.loc_name[:2] == 'H2' or load.loc_name[:4] == 'BESS']
 loads = [load for load in loads if load.loc_name[:2] != 'H2' and load.loc_name[:4] != 'BESS']
 
-initial_total_load_S = 0
-for load in loads:
-    if load.loc_name != 'Load NGET':
-        initial_total_load_S += load.plini
+scenario_data = {}
+with open(os.path.join('..', 'FES data', 'aggregated', SCENARIO_NAME + '.csv')) as csv_file:
+    reader = csv.reader(csv_file)
+    next(reader)  # Skip header
+    for row in reader:
+        scenario_data[row[0]] = [float(value) for value in row[1:]]
 
 for load in loads:
-    if load.loc_name == 'Load NGET':
-        load.plini = EW_load * (1 - DER_SHARE)
+    data = scenario_data[load.loc_name[-4:]]
+    storage = 0  # Included in gross load
+    solar = data[3]
+    wind = data[4]
+    other = data[6]
+    if load.cpZone.loc_name == 'NGET':
+        wind_factor = NGET_WIND_AVAILABILITY
     else:
-        load.plini = load.plini * SCOTLAND_LOAD / initial_total_load_S * (1 - DER_SHARE)  # TODO: mapping from FES regional breakdown? Or assume load distribution does not change
+        wind_factor = SCOTLAND_WIND_AVAILABILITY
+    load.plini = data[0] - solar * SOLAR_FACTOR - wind * wind_factor - other * CHP_FACTOR  # Netted DERs, #TODO: model explicitly
+    load.qlini = data[1]  # Net Q
+    if load.loc_name[-4:] == 'TUMM':
+        load.qlini /= 2  # Necessary to get converging AC OPF, assumed to be handled by Tummel hydro power plant (not modelled)
+    print(load.loc_name, load.plini, load.qlini)
+print('Total load', sum([load.plini for load in loads]))
 
 tfos = app.GetCalcRelevantObjects("*.ElmTr2")
 tfos = [tfo for tfo in tfos if not tfo.outserv]
@@ -1243,6 +1256,7 @@ while True:
         t_end = 5
         init = app.GetFromStudyCase("ComInc")
         init.iopt_reinc = 2  # Always reinitialise algebraic equations at interuption, seems to significantly improve numerical stability
+        init.i_sedirect = 1  # DSL: direct application of events, significantly improve computation time
         simu = app.GetFromStudyCase("ComSim")
         simu.tstop = t_end
         faultType = 0  # 3-Phase short circuit
@@ -1250,6 +1264,7 @@ while True:
         clearTime = 0.1
 
         B4_secure = True
+        app.Show()
         for event in B4_events:
             print('Checking dynamic security for faults in B4 boundary', event)
             app.ResetCalculation()
@@ -1290,7 +1305,7 @@ while True:
                 if boundary_B6_flow_max < 0:
                     raise RuntimeError('Infeasible problem')
                 break
-
+        app.Hide()
         if dynamic_secure:   # System statically and dynamically secure, so stop
             break
 

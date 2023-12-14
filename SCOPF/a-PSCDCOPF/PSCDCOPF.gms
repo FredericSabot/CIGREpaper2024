@@ -93,6 +93,8 @@ variable pfcontingency(i_branch, i_contingency) power flow through lines in cont
 variable theta0(i_bus) bus voltage angles
 variable thetacontingency(i_bus, i_contingency) bus voltage angles in contingency i
 
+* positive variable load_shedding(i_bus) load shedding for relaxation and identification of problematic buses
+
 ***************************************************************
 *** EQUATION DECLARATION
 ***************************************************************
@@ -147,8 +149,8 @@ thetacontingency.fx('27', i_contingency)= 0;
 * AC losses estimated via R*i^2, DC loss estimated as 3% at full load (2GW for each link)
 cost..
 total_cost =e= sum(i_sync, c(i_sync)) + sum(i_hvdc_interconnection, c_interconnection(i_hvdc_interconnection)) - sum(i_dispatchable_load, c_dispatchable_load(i_dispatchable_load))
-                + 1/20*100*0.03*50 * sum(i_hvdc_embedded, P_hvdc_embedded(i_hvdc_embedded) * P_hvdc_embedded(i_hvdc_embedded))
-                + 100*50 * sum(i_branch, branch_resistance(i_branch) * pf0(i_branch) * pf0(i_branch));
+                + 1/20*100*0.03*50 * sum(i_hvdc_embedded, P_hvdc_embedded(i_hvdc_embedded) * P_hvdc_embedded(i_hvdc_embedded));
+*               + 100*50 * sum(i_branch, branch_resistance(i_branch) * pf0(i_branch) * pf0(i_branch)) + 1e5*sum(i_bus, load_shedding(i_bus));
 
 cost_sum(i_sync)..       c(i_sync) =e= P_sync(i_sync) * lincost(i_sync);
 
@@ -187,6 +189,7 @@ sum(i_sync$(sync_map(i_sync, i_bus)), P_sync(i_sync))
 + sum(i_hvdc_interconnection$(hvdc_interconnection_map(i_hvdc_interconnection, i_bus)), P_hvdc_interconnection(i_hvdc_interconnection))
 + sum(i_hvdc_spit$(hvdc_spit_map(i_hvdc_spit, i_bus)), P_hvdc_spit(i_hvdc_spit))
 + sum(i_branch, pf0(i_branch)*branch_map(i_branch, i_bus))
+* + load_shedding(i_bus)
 =e=
 demand(i_bus)
 + sum(i_dispatchable_load$(dispatchable_load_map(i_dispatchable_load, i_bus)), P_dispatchable_load(i_dispatchable_load));
@@ -198,6 +201,7 @@ sum(i_sync$(sync_map(i_sync, i_bus)), P_sync(i_sync))
 + sum(i_hvdc_interconnection$(hvdc_interconnection_map(i_hvdc_interconnection, i_bus)), P_hvdc_interconnection(i_hvdc_interconnection))
 + sum(i_hvdc_spit$(hvdc_spit_map(i_hvdc_spit, i_bus)), P_hvdc_spit(i_hvdc_spit))
 + sum(i_branch, pfcontingency(i_branch, i_contingency)*branch_map(i_branch, i_bus))
+* + load_shedding(i_bus)
 =e=
 demand(i_bus)
 + sum(i_dispatchable_load$(dispatchable_load_map(i_dispatchable_load, i_bus)), P_dispatchable_load(i_dispatchable_load));
@@ -210,9 +214,9 @@ line_capacity_min_0(i_branch)..   pf0(i_branch) =g= -0.95 * branch_max_N(i_branc
 
 line_capacity_max_0(i_branch)..   pf0(i_branch) =l= 0.95 * branch_max_N(i_branch);
 
-line_capacity_min_contingency(i_branch, i_contingency)..   pfcontingency(i_branch, i_contingency) =g= -0.95 * contingency_states(i_branch, i_contingency)*branch_max_E(i_branch);
+line_capacity_min_contingency(i_branch, i_contingency)..   pfcontingency(i_branch, i_contingency) =g= -1 * contingency_states(i_branch, i_contingency)*branch_max_E(i_branch);
 
-line_capacity_max_contingency(i_branch, i_contingency)..   pfcontingency(i_branch, i_contingency) =l= 0.95 * contingency_states(i_branch, i_contingency)*branch_max_E(i_branch);
+line_capacity_max_contingency(i_branch, i_contingency)..   pfcontingency(i_branch, i_contingency) =l= 1 * contingency_states(i_branch, i_contingency)*branch_max_E(i_branch);
 
 voltage_angles_min_0(i_bus)..  theta0(i_bus) =g= -pi;
 
