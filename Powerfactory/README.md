@@ -1,4 +1,4 @@
-The original .pfd files are in the original_data folder. The 18.09.23 version in this folder is the same, but all H2 and BESS loads have been assigned a type (previously some where defined as H2/BESS and some had no type), and H2 and BESS type loads have been defined as constant current.
+The original .pfd files are in the original_data folder. The 18.09.23 version in this folder is the same, but all H2 and BESS loads have been assigned a type (previously some where defined as H2/BESS and some had no type), and H2 and BESS type loads have been defined as constant current. Also, all zone wind generation scaling factors have been set back to one. Wind availability is now handled in the SCOPF directly.
 
 Dispatches are generated based on the scenarios below using a security-constrained (AC) optimal power flow (SCOPF).
 

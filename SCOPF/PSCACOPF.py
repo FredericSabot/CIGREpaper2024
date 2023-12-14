@@ -102,13 +102,15 @@ print('Study Year: %s' %year)
 
 # TODO: define scenarios
 scenario = 1
-if scenario == 1:  # Summer minimum AM Leading the way
-    WIND_AVAILABILITY = 0.8
+if scenario == 1:  # Summer minimum AM Leading the way  # TODO: PM instead
+    SCOTLAND_WIND_AVAILABILITY = 0.8
+    NGET_WIND_AVAILABILITY = 0.8
     SCOTLAND_LOAD = 2597
     EW_load = 25584  # England and Wales
     DER_SHARE = 0.4
 elif scenario == 2:  # Winter peak Leading the way
-    WIND_AVAILABILITY = 0.8
+    SCOTLAND_WIND_AVAILABILITY = 0.8
+    NGET_WIND_AVAILABILITY = 0.8
     SCOTLAND_LOAD = 5574
     EW_load = 57179
     DER_SHARE = 0.4
@@ -541,7 +543,10 @@ wind_max = []
 wind_Qmin = []
 wind_Qmax = []
 for wind_gen in wind_gens:
-    wind_max.append(wind_gen.sgn * wind_gen.cosn * wind_gen.ngnum / baseMVA * WIND_AVAILABILITY)
+    if wind_gen.cpZone.loc_name == 'NGET':
+        wind_max.append(wind_gen.sgn * wind_gen.cosn * wind_gen.ngnum / baseMVA * NGET_WIND_AVAILABILITY)
+    else:
+        wind_max.append(wind_gen.sgn * wind_gen.cosn * wind_gen.ngnum / baseMVA * SCOTLAND_WIND_AVAILABILITY)
     wind_Qmin.append(-wind_gen.sgn * (1-wind_gen.cosn**2)**0.5 * wind_gen.ngnum / baseMVA)
     wind_Qmax.append(wind_gen.sgn * (1-wind_gen.cosn**2)**0.5 * wind_gen.ngnum / baseMVA)
 
@@ -632,7 +637,7 @@ hvdc_spit_min = []
 hvdc_spit_max = []
 hvdc_spit_Qmin = []
 hvdc_spit_Qmax = []
-spit_total_max = 2500 / baseMVA * WIND_AVAILABILITY
+spit_total_max = 2500 / baseMVA * SCOTLAND_WIND_AVAILABILITY
 for hvdc in hvdc_spit:
     hvdc_max = hvdc.sgn * hvdc.cosn * hvdc.ngnum / baseMVA
     hvdc_spit_min.append(0)
@@ -1002,37 +1007,6 @@ def send_data_to_pf(sync_on, P_sync, P_wind, P_hvdc_embedded, P_hvdc_interconnec
     for i, load in enumerate(dispatchable_loads):
         load.plini = P_dispatchable_load[i] * baseMVA
 
-    # For some reason wind generators only produce a (fixed but plant dependent) fraction of their active/reactive setpoints. So add a corrective factor to compensate.
-    # The corrective factors are only computed once when this script is run for the first time
-    csv_path = 'wind_corrective_factors.csv'
-    if not os.path.isfile(csv_path):
-        print('Computing wind corrective factors (reduce wind_max in case of load flow divergence)')
-        for wind_gen in wind_gens:
-            wind_gen.outServPzero = 0
-            if wind_gen.pgini < 0.01:
-                wind_gen.pgini = 0.01  # Avoid division by 0
-        run_load_flow()
-        corrective_factors = []
-        with open(csv_path, 'w', newline='') as csv_file:
-            writer = csv.writer(csv_file)
-            for wind_gen in wind_gens:
-                actual_P = wind_gen.GetAttribute('m:Psum:bus1')
-                corrective_factors.append((wind_gen.pgini * wind_gen.ngnum) / actual_P)
-                writer.writerow([wind_gen.loc_name, corrective_factors[-1]])
-
-    with open(csv_path, newline='') as csv_file:
-        reader = csv.reader(csv_file)
-        csv_content = {}
-        for row in reader:
-            csv_content[row[0]] = row[1]
-
-    corrective_factors = []
-    for wind_gen in wind_gens:
-        corrective_factors.append(float(csv_content[wind_gen.loc_name]))
-
-    for i, wind_gen in enumerate(wind_gens):
-        wind_gen.pgini = P_wind[i] * baseMVA / wind_gen.ngnum * corrective_factors[i]
-        wind_gen.qgini = Q_wind[i] * baseMVA / wind_gen.ngnum * corrective_factors[i]
 
 def run_load_flow(allow_err=False):
     load_flow = app.GetFromStudyCase("ComLdf")
