@@ -51,6 +51,7 @@ parameter P_hvdc_embedded_0(i_hvdc_embedded) initial embedded hvdc flows;
 parameter P_hvdc_interconnection_0(i_hvdc_interconnection) initial hvdc interconection flows;
 parameter P_hvdc_spit_0(i_hvdc_spit) initial hvdc interconection flows;
 parameter P_dispatchable_load_0(i_dispatchable_load) initial dispatchable load demand;
+parameter Ppf_0(i_branch) initial line active power flows;
 
 parameter sync_min(i_sync) sync generator minimum generation;
 parameter sync_max(i_sync) sync generator maximum generation;
@@ -105,7 +106,7 @@ parameter demandQ(i_bus) reactive load at bus s;
 
 
 $gdxin PreACOPF
-$load i_sync i_wind i_syncon i_statcom i_shunt i_statvar i_bus i_branch i_hvdc_embedded i_hvdc_embedded_Q i_hvdc_interconnection i_hvdc_spit i_dispatchable_load sync_map wind_map syncon_map statcom_map shunt_map statvar_map hvdc_embedded_map hvdc_embedded_map_Q1 hvdc_embedded_map_Q2 hvdc_interconnection_map hvdc_spit_map dispatchable_load_map lincost hvdc_interconnection_costs dispatchable_load_costs P_sync_0 P_wind_0 P_hvdc_embedded_0 P_hvdc_interconnection_0 P_hvdc_spit_0 P_dispatchable_load_0 sync_min sync_max sync_Qmin sync_Qmax wind_max wind_Qmin wind_Qmax syncon_Qmin syncon_Qmax statcom_Qmin statcom_Qmax shunt_Qmin shunt_Qmax statvar_Qmin statvar_Qmax hvdc_embedded_min hvdc_embedded_max hvdc_embedded_Qmin hvdc_embedded_Qmax hvdc_interconnection_min hvdc_interconnection_max hvdc_interconnection_Qmin hvdc_interconnection_Qmax hvdc_spit_min hvdc_spit_max hvdc_spit_total_max hvdc_spit_Qmin hvdc_spit_Qmax dispatchable_load_min dispatchable_load_max demand demandQ G B Gff Gft Bff Bft branch_map branch_max_N
+$load i_sync i_wind i_syncon i_statcom i_shunt i_statvar i_bus i_branch i_hvdc_embedded i_hvdc_embedded_Q i_hvdc_interconnection i_hvdc_spit i_dispatchable_load sync_map wind_map syncon_map statcom_map shunt_map statvar_map hvdc_embedded_map hvdc_embedded_map_Q1 hvdc_embedded_map_Q2 hvdc_interconnection_map hvdc_spit_map dispatchable_load_map lincost hvdc_interconnection_costs dispatchable_load_costs P_sync_0 P_wind_0 P_hvdc_embedded_0 P_hvdc_interconnection_0 P_hvdc_spit_0 P_dispatchable_load_0 sync_min sync_max sync_Qmin sync_Qmax wind_max wind_Qmin wind_Qmax syncon_Qmin syncon_Qmax statcom_Qmin statcom_Qmax shunt_Qmin shunt_Qmax statvar_Qmin statvar_Qmax hvdc_embedded_min hvdc_embedded_max hvdc_embedded_Qmin hvdc_embedded_Qmax hvdc_interconnection_min hvdc_interconnection_max hvdc_interconnection_Qmin hvdc_interconnection_Qmax hvdc_spit_min hvdc_spit_max hvdc_spit_total_max hvdc_spit_Qmin hvdc_spit_Qmax dispatchable_load_min dispatchable_load_max demand demandQ G B Gff Gft Bff Bft branch_map branch_max_N Ppf_0
 $gdxin
 
 ***************************************************************
@@ -214,6 +215,8 @@ P_hvdc_interconnection.l(i_hvdc_interconnection) = P_hvdc_interconnection_0(i_hv
 P_hvdc_spit.l(i_hvdc_spit) = P_hvdc_spit_0(i_hvdc_spit);
 P_dispatchable_load.l(i_dispatchable_load) = P_dispatchable_load_0(i_dispatchable_load);
 
+Ppf.l(i_branch) = Ppf_0(i_branch);
+
 *needed for running twice through the same set in a single equation
 alias(i_bus, jb);
 
@@ -231,7 +234,7 @@ sum(i_sync, power(P_sync(i_sync) - P_sync_0(i_sync), 2))
 + sum(i_dispatchable_load, power(P_dispatchable_load(i_dispatchable_load) - P_dispatchable_load_0(i_dispatchable_load), 2))
 + sum(i_hvdc_spit, power(P_hvdc_spit(i_hvdc_spit) - P_hvdc_spit_0(i_hvdc_spit), 2))
 + Kg * Q_penalty;
-* + 100000 * sum(i_bus, load_shedding(i_bus));
+* + 1e4 * sum(i_bus, load_shedding(i_bus));
 
 cost_eq..
 cost =e= sum(i_sync, P_sync(i_sync) * lincost(i_sync))
@@ -354,6 +357,7 @@ sum(i_sync$(sync_map(i_sync, i_bus)), P_sync(i_sync))
 + sum(i_hvdc_interconnection$(hvdc_interconnection_map(i_hvdc_interconnection, i_bus)), P_hvdc_interconnection(i_hvdc_interconnection))
 + sum(i_hvdc_spit$(hvdc_spit_map(i_hvdc_spit, i_bus)), P_hvdc_spit(i_hvdc_spit))
 - demand(i_bus)
+* + load_shedding(i_bus)
 - sum(i_dispatchable_load$(dispatchable_load_map(i_dispatchable_load, i_bus)), P_dispatchable_load(i_dispatchable_load))
 =e=
 V(i_bus) * sum(jb,V(jb) * (G(i_bus,jb) * cos(theta(i_bus)-theta(jb)) + B(i_bus,jb) * sin(theta(i_bus)-theta(jb))));
@@ -371,6 +375,7 @@ sum(i_sync$(sync_map(i_sync, i_bus)), Q_sync(i_sync))
 + sum(i_hvdc_interconnection$(hvdc_interconnection_map(i_hvdc_interconnection, i_bus)), Q_hvdc_interconnection(i_hvdc_interconnection))
 + sum(i_hvdc_spit$(hvdc_spit_map(i_hvdc_spit, i_bus)), Q_hvdc_spit(i_hvdc_spit))
 - demandQ(i_bus)
+* + load_shedding(i_bus)
 =e=
 V(i_bus) * sum(jb,V(jb) * (G(i_bus,jb) * sin(theta(i_bus)-theta(jb)) - B(i_bus,jb) * cos(theta(i_bus)-theta(jb))));
 
@@ -405,7 +410,9 @@ pf(i_branch) =l= branch_max_N(i_branch) * branch_max_N(i_branch);
 ***************************************************************
 
 model test /all/;
+
 option nlp=ipopt;
+test.optfile=1;
 solve test using nlp minimizing deviation;
 
 scalar sol;

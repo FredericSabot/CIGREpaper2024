@@ -1,0 +1,4 @@
+linear_solver pardisomkl
+tol 1e-4
+constr_viol_tol 1e-4
+*max_iter 0

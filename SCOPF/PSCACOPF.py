@@ -764,6 +764,7 @@ P_DC_hvdc_embedded = list({rec.keys[0]:rec.level for rec in db_postDC["P_hvdc_em
 P_DC_hvdc_interconnection = list({rec.keys[0]:rec.level for rec in db_postDC["P_hvdc_interconnection"]}.values())
 P_DC_hvdc_spit = list({rec.keys[0]:rec.level for rec in db_postDC["P_hvdc_spit"]}.values())
 P_DC_dispatchable_load = list({rec.keys[0]:rec.level for rec in db_postDC["P_dispatchable_load"]}.values())
+P_DC_pf = list({rec.keys[0]:rec.level for rec in db_postDC["pf0"]}.values())
 on_DC = {rec.keys[0]:rec.level for rec in db_postDC["on"]}
 for i in range(1, N_sync_gens + 1):
     if on_DC.get('{}'.format(i)) is None:
@@ -896,6 +897,7 @@ addGamsParams(db_preAC, 'P_hvdc_embedded_0', 'Initial embedded hvdc flows', [i_h
 addGamsParams(db_preAC, 'P_hvdc_interconnection_0', 'Initial hvdc interconection flows', [i_hvdc_interconnection], list(P_DC_hvdc_interconnection))
 addGamsParams(db_preAC, 'P_hvdc_spit_0', 'Initial hvdc interconection flows', [i_hvdc_spit], list(P_DC_hvdc_spit))
 addGamsParams(db_preAC, 'P_dispatchable_load_0', 'Initial hvdc interconection flows', [i_dispatchable_load], list(P_DC_dispatchable_load))
+addGamsParams(db_preAC, 'Ppf_0', 'Initial line active power flows', [i_branch], list(P_DC_pf))
 
 db_preAC.export('PreACOPF.gdx')
 t = ws.add_job_from_file('ACOPF.gms')
