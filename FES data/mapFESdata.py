@@ -19,8 +19,8 @@ with open(locations_path, newline='', encoding='utf-8-sig') as csv_file:
 substations = substation_locations.keys()
 
 def aggregate_FES_data(demand_path, output_path):
-    P = {substation: 0 for substation in substations}
-    Q = {substation: 0 for substation in substations}
+    P_gross = {substation: 0 for substation in substations}
+    Q_net = {substation: 0 for substation in substations}
     storage = {substation: 0 for substation in substations}
     solar = {substation: 0 for substation in substations}
     wind = {substation: 0 for substation in substations}
@@ -44,8 +44,8 @@ def aggregate_FES_data(demand_path, output_path):
                         closest_substation = substation
                         min_distance = distance
 
-            P[closest_substation] += float(row[4])
-            Q[closest_substation] += float(row[6])
+            P_gross[closest_substation] += float(row[4])
+            Q_net[closest_substation] += float(row[6])
             storage[closest_substation] += float(row[7])
             solar[closest_substation] += float(row[8])
             wind[closest_substation] += float(row[9])
@@ -54,9 +54,9 @@ def aggregate_FES_data(demand_path, output_path):
 
     with open(output_path, 'w', newline='', encoding='utf-8-sig') as csv_file:
         writer = csv.writer(csv_file)
-        writer.writerow(['Substation', 'P', 'Q', 'storage', 'solar', 'wind', 'hydro', 'other'])
+        writer.writerow(['Substation', 'P_gross', 'Q_net', 'storage', 'solar', 'wind', 'hydro', 'other'])
         for substation in substations:
-            writer.writerow([substation, P[substation], Q[substation], storage[substation], solar[substation], wind[substation], hydro[substation], other[substation]])
+            writer.writerow([substation, P_gross[substation], Q_net[substation], storage[substation], solar[substation], wind[substation], hydro[substation], other[substation]])
 
 aggregate_FES_data('original/SummerPM_30_leading.csv', 'aggregated/SummerPM_30_leading.csv')
 aggregate_FES_data('original/SummerAM_30_leading.csv', 'aggregated/SummerAM_30_leading.csv')
