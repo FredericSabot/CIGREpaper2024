@@ -800,6 +800,11 @@ theta_DC = list({rec.keys[0]:rec.level for rec in db_postDC["theta0"]}.values())
 
 cost = db_postDC["total_cost"].first_record().level
 
+load_shedding_DC = {rec.keys[0]:rec.level for rec in db_postDC["load_shedding"]}
+for i, load_shedding in load_shedding_DC.values():
+    if load_shedding > 0:
+        raise RuntimeError('DC OPF needed to apply load shedding at bus', buses[i].loc_name)
+
 print('Total cost:', round(cost, 2))
 print('Sync gen:', sum(P_DC_sync) * baseMVA / 1000, ' / ', sum(sync_max) * baseMVA / 1000, 'GW')
 print('Wind gen:', (sum(P_DC_wind) + sum(P_DC_hvdc_spit)) * baseMVA / 1000, ' / ', (sum(wind_max) + spit_total_max) * baseMVA / 1000, 'GW')
