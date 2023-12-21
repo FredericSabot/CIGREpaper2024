@@ -101,17 +101,17 @@ year = 2031
 print('Study Year: %s' %year)
 
 # TODO: define scenarios
-scenario = 2
+scenario = 1
 if scenario == 1:  # Summer minimum PM Leading the way
     SCOTLAND_WIND_AVAILABILITY = 0.8
     NGET_WIND_AVAILABILITY = 0.8 * 0.58
-    SCENARIO_NAME = 'SummerPM_30_leading'
+    SCENARIO_NAME = 'SummerPM_{}_leading'.format(year)
     SOLAR_FACTOR = 0.68  # All-time peak according to https://www.solar.sheffield.ac.uk/pvlive/ (checked on 14/12/2023, peak reached on 2023-04-20 12:30PM which is not really in the summer)
     CHP_FACTOR = 0.2
 elif scenario == 2:  # Winter peak Leading the way
     SCOTLAND_WIND_AVAILABILITY = 0.8
     NGET_WIND_AVAILABILITY = 0.8 * 0.7
-    SCENARIO_NAME = 'Winter_30_leading'
+    SCENARIO_NAME = 'Winter_{}_leading'.format(year)
     SOLAR_FACTOR = 0  # Winter evening
     CHP_FACTOR = 0.7
 
@@ -123,10 +123,11 @@ for Activevariation in Activevariations:  # Start by deactivating all
     Activevariation.Deactivate()
 for variation in variation_folder.GetContents():
     if year == 2031 :
-        if variation.loc_name == '2030 NETWORK' or  variation.loc_name == 'SPf phase 2 (2031 network)' or  variation.loc_name == 'HVDC as 2-Terminal links & cable' :
+        if variation.loc_name == '2030 NETWORK' or  variation.loc_name == 'SPf phase 2 (2030 network)' or  variation.loc_name == 'HVDC as 2-Terminal links & cable':
             variation.Activate()
-    elif year == 2021 :
-        pass  # TODO: activate SPf phase 2 (2021 network) ?? (not done in Sam's script)
+    elif year == 2021:
+        if variation.loc_name == 'SPf phase 2 (2021 network)':
+            variation.Activate()
 
 # Read network elements (note that they should be reloaded if a different network variation is activated) + sanity check
 loads = app.GetCalcRelevantObjects("*.ElmLod")
@@ -185,7 +186,7 @@ lines = [line for line in lines if line.bus1.IsClosed() and line.bus2.IsClosed()
 boundaries = app.GetCalcRelevantObjects('*.ElmBoundary')
 if year == 2021:
     boundary_B4 = find_by_loc_name(boundaries, 'B4 Boundary')
-elif year == 2031:
+elif year == 2030:
     boundary_B4 = find_by_loc_name(boundaries, 'B4 Boundary')
 else:
     raise NotImplementedError('Year not considered')
@@ -246,10 +247,13 @@ for i in range(N_lines):
         B6_map[index, B6_index] = 1
         B6_index += 1
 
-    admit.append(1 / lines[i].xSbasepu * lines[i].nlnum)
+    X = max(lines[i].xSbasepu, 1e-6)  # Avoid division by 0
+    admit.append(1 / X * lines[i].nlnum)
     resist.append(lines[i].rSbasepu / lines[i].nlnum)
 
     z = (lines[i].rSbasepu + 1j * lines[i].xSbasepu) / lines[i].nlnum
+    if z == 0:
+        z = 1j * 1e-6
     y1 = 1j * lines[i].bSbasepu * lines[i].nlnum / 2
     y2 = 1j * lines[i].bSbasepu * lines[i].nlnum / 2
     branch_FromFrom[index] = y1 + 1/z
@@ -403,7 +407,8 @@ statvars = app.GetCalcRelevantObjects("*.ElmSvs")
 statvars = [statvar for statvar in statvars if not statvar.outserv]
 
 IBRs = app.GetCalcRelevantObjects("*.ElmGenstat")  # includes HVDCs under ElmGenstat
-find_by_loc_name(IBRs, 'DC BESS').pgini = 0 # 120 (*7) in original data
+if year == 2030:
+    find_by_loc_name(IBRs, 'DC BESS').pgini = 0 # 120 (*7) in original data
 IBRs = [ibr for ibr in IBRs if ibr.loc_name != 'EFR BESS' and ibr.loc_name != 'DC BESS']
 IBRs = [ibr for ibr in IBRs if not ibr.outserv]
 wind_gens = [ibr for ibr in IBRs if 'HVDC' not in ibr.loc_name]
@@ -429,8 +434,10 @@ for hvdc_1, hvdc_2 in zip(hvdc_embedded_1, hvdc_embedded_2):
     if hvdc_1.loc_name[:-3] != hvdc_2.loc_name[:-3]:
         raise RuntimeError('Expected hvdc list to be sorted')
 
-if len(hvdc_spit) != 2:
+if len(hvdc_spit) != 2 and year == 2030:
     raise RuntimeError('Expected 2 hvdc links for SPIT')
+elif len(hvdc_spit) != 1 and year == 2021:
+    raise RuntimeError('Expected 1 hvdc link for SPIT')
 
 N_sync_gens = len(sync_gens)
 sync_gen_map = np.zeros((N_sync_gens, N_buses))
@@ -464,6 +471,7 @@ for i in range(N_statvars):
 
 N_hvdc_embedded = len(hvdc_embedded_1) + 1
 hvdc_embedded_map = np.zeros((N_hvdc_embedded, N_buses))
+i = -1  # No embedded hvdc links in 2021 scenario
 for i in range(N_hvdc_embedded - 1):
     hvdc_embedded_map[i][bus_names.index(hvdc_embedded_1[i].bus1.GetParent().loc_name)] = 1
     hvdc_embedded_map[i][bus_names.index(hvdc_embedded_2[i].bus1.GetParent().loc_name)] = -1  # Neglect losses (depend on flow direction + small and most of them occur at NGET bus)
@@ -637,7 +645,7 @@ for hvdc_interconnection in hvdc_interconnections:
 # Sum of HVDC connections via England (modelled as load)
 if year == 2021:
     hvdc_max = 6000 / baseMVA
-elif year == 2031:
+elif year == 2030:
     hvdc_max = (15900 - 2800) / baseMVA
 else:
     raise NotImplementedError('Year not modelled')
@@ -653,7 +661,7 @@ hvdc_spit_Qmax = []
 spit_total_max = 2500 / baseMVA * SCOTLAND_WIND_AVAILABILITY
 for hvdc in hvdc_spit:
     hvdc_max = hvdc.sgn * hvdc.cosn * hvdc.ngnum / baseMVA
-    hvdc_spit_min.append(0)
+    hvdc_spit_min.append(0.2 * spit_total_max)  # Export at least part of the power through both HVDCs
     hvdc_spit_max.append(hvdc_max)
     hvdc_spit_Qmin.append(- hvdc.sgn * (1-hvdc.cosn**2)**0.5 * hvdc.ngnum / baseMVA)
     hvdc_spit_Qmax.append(hvdc.sgn * (1-hvdc.cosn**2)**0.5 * hvdc.ngnum / baseMVA)
@@ -1243,7 +1251,7 @@ while True:
             B4_events.append(['LOAN2_TUMM2_1', 'MELG4_DENN4_1'])  # Fault on parallel lines
             B4_events.append(['KINT2_LOAN2', 'LOAN2_TEAL_R2_2'])
             B4_events.append(['LOAN2_TEAL2_R1_1', 'LOAN2_TEAL2_R1_2'])
-        elif year == 2031:
+        elif year == 2030:
             B4_events.append(['KINA4_DENN4_1', 'MELG4_DENN4_1'])
             B4_events.append(['ALYT4_KINC4_1', 'ALYT4_KINC4_2'])
             B4_events.append(['LOAN2_TEAL2_R1_1', 'LOAN2_TEAL2_R1_2'])

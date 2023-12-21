@@ -1,0 +1,1 @@
+Actually, 2022 data is used instead of the 2021 one as there are no 2021 data in 2023 FES data and the one in FES 2020 seem inconsistent (lead to 23GVar consumption at PEHE)

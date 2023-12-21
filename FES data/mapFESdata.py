@@ -58,6 +58,10 @@ def aggregate_FES_data(demand_path, output_path):
         for substation in substations:
             writer.writerow([substation, P_gross[substation], Q_net[substation], storage[substation], solar[substation], wind[substation], hydro[substation], other[substation]])
 
-aggregate_FES_data('original/SummerPM_30_leading.csv', 'aggregated/SummerPM_30_leading.csv')
-aggregate_FES_data('original/SummerAM_30_leading.csv', 'aggregated/SummerAM_30_leading.csv')
-aggregate_FES_data('original/Winter_30_leading.csv', 'aggregated/Winter_30_leading.csv')
+aggregate_FES_data('original/SummerPM_2021_leading.csv', 'aggregated/SummerPM_2021_leading.csv')
+aggregate_FES_data('original/SummerAM_2021_leading.csv', 'aggregated/SummerAM_2021_leading.csv')
+aggregate_FES_data('original/Winter_2021_leading.csv', 'aggregated/Winter_2021_leading.csv')
+
+aggregate_FES_data('original/SummerPM_2030_leading.csv', 'aggregated/SummerPM_2030_leading.csv')
+aggregate_FES_data('original/SummerAM_2030_leading.csv', 'aggregated/SummerAM_2030_leading.csv')
+aggregate_FES_data('original/Winter_2030_leading.csv', 'aggregated/Winter_2030_leading.csv')
