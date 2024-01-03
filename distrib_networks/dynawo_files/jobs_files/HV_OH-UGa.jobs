@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<dyn:jobs xmlns:dyn="http://www.rte-france.com/dynawo">
+  <dyn:job name="HV_OH-UGa">
+    <dyn:solver lib="dynawo_SolverSIM" parFile="HV_OH-UGa.par" parId="SolverSIM"/>
+    <dyn:modeler compileDir="HV_OH-UGa/compilation">
+      <dyn:network iidmFile="HV_OH-UGa.iidm" parFile="HV_OH-UGa.par" parId="Network"/>
+      <dyn:dynModels dydFile="HV_OH-UGa.dyd"/>
+      <dyn:precompiledModels useStandardModels="true"/>
+      <dyn:modelicaModels useStandardModels="true"/>
+    </dyn:modeler>
+    <dyn:simulation startTime="0" stopTime="5"/>
+    <dyn:outputs directory="HV_OH-UGa">
+      <dyn:timeline exportMode="TXT" filter="true"/>
+      <dyn:curves inputFile="HV_OH-UGa.crv" exportMode="CSV"/>
+      <dyn:logs>
+        <dyn:appender tag="" file="dynawo.log" lvlFilter="INFO"/>
+      </dyn:logs>
+    </dyn:outputs>
+  </dyn:job>
+</dyn:jobs>

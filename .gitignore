@@ -5,3 +5,11 @@ SCOPF/**/*.dat
 SCOPF/**/*.log*
 SCOPF/**/*.lxi
 SCOPF/results.csv
+**/curves/*
+*.log
+**/__pycache__/*
+*.pdf
+*.svg
+distrib_networks/dynawo_files/*.*
+distrib_networks/dynawo_files/Deterministic/**
+distrib_networks/dynawo_files/Random/**

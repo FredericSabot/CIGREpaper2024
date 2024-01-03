@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<dyn:jobs xmlns:dyn="http://www.rte-france.com/dynawo">
+  <dyn:job name="ehv5">
+    <dyn:solver lib="dynawo_SolverSIM" parFile="ehv5.par" parId="SolverSIM"/>
+    <dyn:modeler compileDir="ehv5/compilation">
+      <dyn:network iidmFile="ehv5.iidm" parFile="ehv5.par" parId="Network"/>
+      <dyn:dynModels dydFile="ehv5.dyd"/>
+      <dyn:precompiledModels useStandardModels="true"/>
+      <dyn:modelicaModels useStandardModels="true"/>
+    </dyn:modeler>
+    <dyn:simulation startTime="0" stopTime="5"/>
+    <dyn:outputs directory="ehv5">
+      <dyn:timeline exportMode="TXT" filter="true"/>
+      <dyn:curves inputFile="ehv5.crv" exportMode="CSV"/>
+      <dyn:logs>
+        <dyn:appender tag="" file="dynawo.log" lvlFilter="INFO"/>
+      </dyn:logs>
+    </dyn:outputs>
+  </dyn:job>
+</dyn:jobs>

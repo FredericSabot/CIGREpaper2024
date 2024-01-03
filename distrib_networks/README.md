@@ -1,0 +1,20 @@
+## Changes compared to ukgs data
+
+Max tap of the GSP transformers increased from 1.05 to 1.1 for ehv1 and ehv2 (allows for acceptable voltage even if the GSP voltage is 0.95pu)
+In ehv1, the map tap of the 304/321 transformer (just after the sub-sea cable) is increased from 1.05 to 1.1.
+In ehv2, the max tap of the 132/66kV transformers are increased from 1.1 to 1.15 (non standard but seems necessary, a shunt capa could also be added). Same for the 275/132kV tfos in the ehv3 network.
+
+All transformers taps are set to obtain acceptable voltage profiles at peak load.
+
+
+
+SP Distribution - Long Term Development Statement - Nov 2022
+Voltage Regulations
+In accordance with The Electricity Safety, Quality and Continuity Regulations 2002 (which replace the
+Electricity Supply Regulations 1988), the voltage supplied to customers must not, other than in exceptional
+circumstances, vary from the declared value by more than the values indicated in Table 2 below.
+Declared Voltage Variation in Voltage from that Declared
+
+LV not exceeding 10 percent above or 6 percent below
+HV not exceeding 6 percent above or below
+33kV not exceeding 6 percent above or below
