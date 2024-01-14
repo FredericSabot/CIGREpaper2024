@@ -226,6 +226,7 @@ variable Q2(i_branch) reactive power flow through lines in base state
 
 variable B4_flow total flow through boundary B4
 variable B6_flow total flow through boundary B6
+positive variable P1_abs(i_branch) absolute value of line flows
 
 variable P1_ck(i_branch, i_contingency) active power flow through lines in line contingency state
 variable Q1_ck(i_branch, i_contingency) reactive power flow through lines in line contingency state
@@ -291,6 +292,8 @@ boundary_B4 defining total power flow through boundary B4
 boundary_B6 defining total power flow through boundary B6
 boundary_B4_max maximum flow through boundary B4
 boundary_B6_max maximum flow through boundary B6
+P1_abs_neg(i_branch) compute absolute value of line flows
+P1_abs_pos(i_branch) compute absolute value of line flows
 SPowerDevck(i_sync, i_contingency) power deviation after a line contingency
 Vdev(i_bus, i_contingency) voltage deviation from generator setpoint
 Vdev2(i_bus, i_contingency) voltage deviation from generator setpoint
@@ -400,6 +403,7 @@ Q2.l(i_branch) = Q2_0(i_branch);
 
 B4_flow.l = B4_flow_0;
 B6_flow.l = B6_flow_0;
+P1_abs.l(i_branch) = abs(P1_0(i_branch));
 
 P1_ck.l(i_branch, i_contingency) = P1_ck_0(i_branch, i_contingency);
 Q1_ck.l(i_branch, i_contingency) = Q1_ck_0(i_branch, i_contingency);
@@ -612,16 +616,23 @@ line_max2(i_branch)..
 P2(i_branch)*P2(i_branch)+Q2(i_branch)*Q2(i_branch) =l= branch_max_N(i_branch)*branch_max_N(i_branch);
 
 boundary_B4..
-B4_flow =e= sum(i_branch, sum(i_B4, B4_map(i_branch, i_B4) * P1(i_branch) * P1(i_branch)));
+B4_flow =e= sum(i_branch, sum(i_B4, B4_map(i_branch, i_B4) * P1_abs(i_branch)));
 
 boundary_B6..
-B6_flow =e= sum(i_branch, sum(i_B6, B6_map(i_branch, i_B6) * P1(i_branch) * P1(i_branch)));
+B6_flow =e= sum(i_branch, sum(i_B6, B6_map(i_branch, i_B6) * P1_abs(i_branch)));
 
 boundary_B4_max..
-B4_flow =l= B4_flow_max * B4_flow_max;
+B4_flow =l= B4_flow_max;
 
 boundary_B6_max..
 B6_flow =l= B6_flow_max * B6_flow_max;
+
+P1_abs_neg(i_branch)..
+P1_abs(i_branch) =g= -P1(i_branch);
+
+P1_abs_pos(i_branch)..
+P1_abs(i_branch) =g= P1(i_branch);
+
 
 SPowerDevck(i_sync, i_contingency)..
 P_sync_ck(i_sync, i_contingency) =l= P_sync(i_sync) - DeltaF_ck(i_contingency) * droop(i_sync);

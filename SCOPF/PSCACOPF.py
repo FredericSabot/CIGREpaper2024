@@ -66,6 +66,8 @@ def check_stability(results_csv, buses, sync_machines, t_end):
         data = pd.read_csv(f, sep=",", header=[0, 1])
 
     if data['All calculations', 'b:tnow in s'].iloc[-1] < t_end:
+        stable = False
+        return stable
         raise RuntimeError('Convergence issue in dynamic simulation')
 
     # Check for voltage issues
@@ -187,7 +189,7 @@ boundaries = app.GetCalcRelevantObjects('*.ElmBoundary')
 if year == 2021:
     boundary_B4 = find_by_loc_name(boundaries, 'B4 Boundary')
 elif year == 2030:
-    boundary_B4 = find_by_loc_name(boundaries, 'B4 Boundary')
+    boundary_B4 = find_by_loc_name(boundaries, 'B4 Boundary 2030')
 else:
     raise NotImplementedError('Year not considered')
 boundary_B6 = find_by_loc_name(boundaries, 'B6 Boundary')
@@ -761,6 +763,10 @@ addGamsParams(db_preDC, 'branch_max_E', 'Emergency branch max power', [i_branch]
 
 contingency_states = np.ones((N_branches, N_branches)) - np.diag(np.diag(np.ones((N_branches, N_branches))))  # Matrix full of ones, but zeroes on the diagonal
 contingency_states = contingency_states[:, :N_lines]  # Only consider failure of lines, not transformers, series capa, etc.
+for i, line in enumerate(lines):
+    if line.xSbasepu == 0:
+        contingency_states[i, i] = 1  # Don't consider contingency of perfect lines
+
 addGamsParams(db_preDC, 'contingency_states', 'Line states in the considered contingencies', [i_branch, i_contingency], contingency_states)
 
 addGamsParams(db_preDC, 'demand', 'demand at each bus', [i_bus], np.array(demand_bus) * (1 + losses))
@@ -1293,13 +1299,15 @@ while True:
             if not secure:
                 B4_secure = False
                 dynamic_secure = False
-                boundary_B4_flow_max = boundary_B4_flow - 100 / baseMVA
+                boundary_B4_flow_max = boundary_B4_flow - 200 / baseMVA
                 if boundary_B4_flow_max < 0:
                     raise RuntimeError('Infeasible problem')
                 break
 
         B6_secure = True
         for event in B6_events:
+            if not dynamic_secure:
+                break
             print('Checking dynamic security for faults in B6 boundary', event)
             app.ResetCalculation()
             clearSimEvents()
@@ -1314,7 +1322,7 @@ while True:
             if not secure:
                 B6_secure = False
                 dynamic_secure = False
-                boundary_B6_flow_max = boundary_B6_flow - 100 / baseMVA
+                boundary_B6_flow_max = boundary_B6_flow - 200 / baseMVA
                 if boundary_B6_flow_max < 0:
                     raise RuntimeError('Infeasible problem')
                 break
