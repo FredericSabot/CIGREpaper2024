@@ -1,0 +1,52 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<iidm:network xmlns:iidm="http://www.powsybl.org/schema/iidm/1_4" id="Reduced_CIGRE_MV" caseDate="2022-02-16T12:49:39.424+01:00" forecastDistance="0" sourceFormat="UKGDS">
+  <iidm:substation id="SUB-0">
+    <iidm:voltageLevel id="VL-0" nominalV="132.0" topologyKind="BUS_BREAKER">
+      <iidm:busBreakerTopology>
+        <iidm:bus id="B-0"/>
+      </iidm:busBreakerTopology>
+      <iidm:generator id="GEN-slack" energySource="OTHER" minP="-9999.99" maxP="9999.99" voltageRegulatorOn="true" targetP="75.0" targetV="132.0" targetQ="0.0" bus="B-0" connectableBus="B-0">
+        <iidm:minMaxReactiveLimits minQ="-1.7976931348623157E308" maxQ="1.7976931348623157E308"/>
+      </iidm:generator>
+      <iidm:load id="LOAD-slack" loadType="UNDEFINED" p0="-0.0" q0="0.0" bus="B-0" connectableBus="B-0"/>
+    </iidm:voltageLevel>
+    <iidm:voltageLevel id="VL-MV" nominalV="33.0" topologyKind="BUS_BREAKER">
+      <iidm:busBreakerTopology>
+        <iidm:bus id="B-MV"/>
+      </iidm:busBreakerTopology>
+      <iidm:generator id="IBG-G99" energySource="OTHER" minP="0.0" maxP="44.84" voltageRegulatorOn="false" targetP="4.9324" targetV="33.0" targetQ="0.0" bus="B-MV" connectableBus="B-MV">
+        <iidm:minMaxReactiveLimits minQ="-1.7976931348623157E308" maxQ="1.7976931348623157E308"/>
+      </iidm:generator>
+      <iidm:generator id="IBG-legacy" energySource="OTHER" minP="0.0" maxP="31.159999999999997" voltageRegulatorOn="false" targetP="3.4275999999999995" targetV="33.0" targetQ="0.0" bus="B-MV" connectableBus="B-MV">
+        <iidm:minMaxReactiveLimits minQ="-1.7976931348623157E308" maxQ="1.7976931348623157E308"/>
+      </iidm:generator>
+      <iidm:load id="LOAD" loadType="UNDEFINED" p0="41.0" q0="0.0" bus="B-MV" connectableBus="B-MV"/>
+    </iidm:voltageLevel>
+    <iidm:twoWindingsTransformer id="TFO" r="0.0" x="0.1" g="0.0" b="0.0" ratedU1="132.0" ratedU2="33.0" bus1="B-0" connectableBus1="B-0" voltageLevelId1="VL-0" bus2="B-MV" connectableBus2="B-MV" voltageLevelId2="VL-MV">
+      <iidm:ratioTapChanger lowTapPosition="0" tapPosition="20" targetDeadband="0.66" loadTapChangingCapabilities="true" regulating="true" targetV="33.99">
+        <iidm:terminalRef id="TFO" side="TWO"/>
+        <iidm:step r="0.0" x="0.0" g="0.0" b="0.0" rho="0.85"/>
+        <iidm:step r="0.0" x="0.0" g="0.0" b="0.0" rho="0.865"/>
+        <iidm:step r="0.0" x="0.0" g="0.0" b="0.0" rho="0.88"/>
+        <iidm:step r="0.0" x="0.0" g="0.0" b="0.0" rho="0.895"/>
+        <iidm:step r="0.0" x="0.0" g="0.0" b="0.0" rho="0.9099999999999999"/>
+        <iidm:step r="0.0" x="0.0" g="0.0" b="0.0" rho="0.9249999999999999"/>
+        <iidm:step r="0.0" x="0.0" g="0.0" b="0.0" rho="0.94"/>
+        <iidm:step r="0.0" x="0.0" g="0.0" b="0.0" rho="0.955"/>
+        <iidm:step r="0.0" x="0.0" g="0.0" b="0.0" rho="0.97"/>
+        <iidm:step r="0.0" x="0.0" g="0.0" b="0.0" rho="0.9849999999999999"/>
+        <iidm:step r="0.0" x="0.0" g="0.0" b="0.0" rho="1.0"/>
+        <iidm:step r="0.0" x="0.0" g="0.0" b="0.0" rho="1.015"/>
+        <iidm:step r="0.0" x="0.0" g="0.0" b="0.0" rho="1.03"/>
+        <iidm:step r="0.0" x="0.0" g="0.0" b="0.0" rho="1.045"/>
+        <iidm:step r="0.0" x="0.0" g="0.0" b="0.0" rho="1.06"/>
+        <iidm:step r="0.0" x="0.0" g="0.0" b="0.0" rho="1.075"/>
+        <iidm:step r="0.0" x="0.0" g="0.0" b="0.0" rho="1.0899999999999999"/>
+        <iidm:step r="0.0" x="0.0" g="0.0" b="0.0" rho="1.105"/>
+        <iidm:step r="0.0" x="0.0" g="0.0" b="0.0" rho="1.1199999999999999"/>
+        <iidm:step r="0.0" x="0.0" g="0.0" b="0.0" rho="1.1349999999999998"/>
+        <iidm:step r="0.0" x="0.0" g="0.0" b="0.0" rho="1.15"/>
+      </iidm:ratioTapChanger>
+    </iidm:twoWindingsTransformer>
+  </iidm:substation>
+</iidm:network>

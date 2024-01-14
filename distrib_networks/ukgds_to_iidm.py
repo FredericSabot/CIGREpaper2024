@@ -212,7 +212,7 @@ def add_shunts(network: pp.network.Network, book, baseMVA):
         network.create_shunt_compensators(shunt_df, model_df)
 
 
-def add_loads(network: pp.network.Network, network_name, book, base_factor, dyd_root, par_root, motor_share):
+def add_loads(network: pp.network.Network, network_name, book, base_factor, dyd_root, par_root, seed = None):
     # Static data
     load_sheet = book.sheet_by_name('Loads')
     vl = network.get_voltage_levels()
@@ -253,13 +253,19 @@ def add_loads(network: pp.network.Network, network_name, book, base_factor, dyd_
 
     # Dynamic data
     loads = network.get_loads()
+
+    if seed == None:
+        motor_share = 0.34
+    else:
+        motor_share = [0.3, 0.34, 0.4][seed]
+
     if motor_share != 0:
-        lib = 'LoadAlphaBetaMotor'
+        lib = 'LoadAlphaBetaThreeMotorFifthOrder'
     else:
         lib = 'LoadAlphaBeta'
 
     for loadID in loads.index:
-        load_attrib = {'id': loadID, 'lib': lib, 'parFile': network_name + '.par', 'parId': 'GenericLoadAlphaBetaMotor', 'staticId': loadID}
+        load_attrib = {'id': loadID, 'lib': lib, 'parFile': network_name + '.par', 'parId': 'LoadAlphaBetaMotor', 'staticId': loadID}
         load = etree.SubElement(dyd_root, etree.QName(NAMESPACE, 'blackBoxModel'), load_attrib)
 
         etree.SubElement(load, etree.QName(NAMESPACE, 'macroStaticRef'), {'id': 'LOAD'})
@@ -268,22 +274,70 @@ def add_loads(network: pp.network.Network, network_name, book, base_factor, dyd_
         if 'Motor' in  load_attrib['lib']:
             etree.SubElement(dyd_root, etree.QName(NAMESPACE, 'connect'), {'id1': loadID, 'var1': 'load_omegaRefPu', 'id2': 'OMEGA_REF', 'var2': 'omegaRef_0'})
 
-    motor_par_set = etree.SubElement(par_root, etree.QName(NAMESPACE, 'set'), {'id' : 'GenericLoadAlphaBetaMotor'})
+    motor_par_set = etree.SubElement(par_root, etree.QName(NAMESPACE, 'set'), {'id' : 'LoadAlphaBetaMotor'})
+    # Motor A, B, C parameters from https://www.nerc.com/comm/PC/LoadModelingTaskForceDL/Dynamic%20Load%20Modeling%20Tech%20Ref%202016-11-14%20-%20FINAL.PDF
     par_attribs = [
         {'type': 'DOUBLE', 'name': 'load_alpha', 'value': '2'},
         {'type': 'DOUBLE', 'name': 'load_beta', 'value': '2'},
-        {'type': 'DOUBLE', 'name': 'load_Alpha', 'value': '2.0'},
-        {'type': 'DOUBLE', 'name': 'load_Beta', 'value': '2.0'},
-        {'type': 'DOUBLE', 'name': 'load_ActiveMotorShare', 'value': str(motor_share)},
-        {'type': 'DOUBLE', 'name': 'load_RrPu', 'value': '0.02'},
-        {'type': 'DOUBLE', 'name': 'load_RsPu', 'value': '0.02'},
-        {'type': 'DOUBLE', 'name': 'load_XmPu', 'value': '4.0'},
-        {'type': 'DOUBLE', 'name': 'load_XrPu', 'value': '0.1'},
-        {'type': 'DOUBLE', 'name': 'load_XsPu', 'value': '0.1'},
-        {'type': 'DOUBLE', 'name': 'load_H', 'value': '1.5'},
-        {'type': 'DOUBLE', 'name': 'load_tFilter', 'value': '0.1'},
-        {'type': 'DOUBLE', 'name': 'load_UMinPu', 'value': '0.5'},
-        {'type': 'DOUBLE', 'name': 'load_UMaxPu', 'value': '1.5'},
+        {'type': 'DOUBLE', 'name': 'load_Alpha', 'value': '2'},
+        {'type': 'DOUBLE', 'name': 'load_Beta', 'value': '2'},
+        {'type': 'DOUBLE', 'name': 'load_ActiveMotorShare_0_', 'value': str(17.13/34.48 * motor_share)},
+        {'type': 'DOUBLE', 'name': 'load_RsPu_0_', 'value': '0.04'},
+        {'type': 'DOUBLE', 'name': 'load_LsPu_0_', 'value': '1.8'},
+        {'type': 'DOUBLE', 'name': 'load_LPPu_0_', 'value': '0.12'},
+        {'type': 'DOUBLE', 'name': 'load_LPPPu_0_', 'value': '0.104'},
+        {'type': 'DOUBLE', 'name': 'load_tP0_0_', 'value': '0.095'},
+        {'type': 'DOUBLE', 'name': 'load_tPP0_0_', 'value': '0.0021'},
+        {'type': 'DOUBLE', 'name': 'load_H_0_', 'value': '0.1'},
+        {'type': 'DOUBLE', 'name': 'load_torqueExponent_0_', 'value': '0'},
+        {'type': 'DOUBLE', 'name': 'load_Utrip1Pu_0_', 'value': '0.65'},
+        {'type': 'DOUBLE', 'name': 'load_tTrip1Pu_0_', 'value': '0.1'},
+        {'type': 'DOUBLE', 'name': 'load_shareTrip1Pu_0_', 'value': '0.2'},
+        {'type': 'DOUBLE', 'name': 'load_Ureconnect1Pu_0_', 'value': '0.1'},
+        {'type': 'DOUBLE', 'name': 'load_tReconnect1Pu_0_', 'value': '9999'},
+        {'type': 'DOUBLE', 'name': 'load_Utrip2Pu_0_', 'value': '0.5'},
+        {'type': 'DOUBLE', 'name': 'load_tTrip2Pu_0_', 'value': '0.02'},
+        {'type': 'DOUBLE', 'name': 'load_shareTrip2Pu_0_', 'value': '0.75'},
+        {'type': 'DOUBLE', 'name': 'load_Ureconnect2Pu_0_', 'value': '0.65'},
+        {'type': 'DOUBLE', 'name': 'load_tReconnect2Pu_0_', 'value': '0.1'},
+        {'type': 'DOUBLE', 'name': 'load_ActiveMotorShare_1_', 'value': str(11.15/34.48 * motor_share)},
+        {'type': 'DOUBLE', 'name': 'load_RsPu_1_', 'value': '0.03'},
+        {'type': 'DOUBLE', 'name': 'load_LsPu_1_', 'value': '1.8'},
+        {'type': 'DOUBLE', 'name': 'load_LPPu_1_', 'value': '0.19'},
+        {'type': 'DOUBLE', 'name': 'load_LPPPu_1_', 'value': '0.14'},
+        {'type': 'DOUBLE', 'name': 'load_tP0_1_', 'value': '0.2'},
+        {'type': 'DOUBLE', 'name': 'load_tPP0_1_', 'value': '0.0026'},
+        {'type': 'DOUBLE', 'name': 'load_H_1_', 'value': '0.5'},
+        {'type': 'DOUBLE', 'name': 'load_torqueExponent_1_', 'value': '2'},
+        {'type': 'DOUBLE', 'name': 'load_Utrip1Pu_1_', 'value': '0.55'},
+        {'type': 'DOUBLE', 'name': 'load_tTrip1Pu_1_', 'value': '0.02'},
+        {'type': 'DOUBLE', 'name': 'load_shareTrip1Pu_1_', 'value': '0.3'},
+        {'type': 'DOUBLE', 'name': 'load_Ureconnect1Pu_1_', 'value': '0.65'},
+        {'type': 'DOUBLE', 'name': 'load_tReconnect1Pu_1_', 'value': '0.05'},
+        {'type': 'DOUBLE', 'name': 'load_Utrip2Pu_1_', 'value': '0.5'},
+        {'type': 'DOUBLE', 'name': 'load_tTrip2Pu_1_', 'value': '0.025'},
+        {'type': 'DOUBLE', 'name': 'load_shareTrip2Pu_1_', 'value': '0.3'},
+        {'type': 'DOUBLE', 'name': 'load_Ureconnect2Pu_1_', 'value': '0.60'},
+        {'type': 'DOUBLE', 'name': 'load_tReconnect2Pu_1_', 'value': '0.05'},
+        {'type': 'DOUBLE', 'name': 'load_ActiveMotorShare_2_', 'value': str(6.2/34.48 * motor_share)},
+        {'type': 'DOUBLE', 'name': 'load_RsPu_2_', 'value': '0.03'},
+        {'type': 'DOUBLE', 'name': 'load_LsPu_2_', 'value': '1.8'},
+        {'type': 'DOUBLE', 'name': 'load_LPPu_2_', 'value': '0.19'},
+        {'type': 'DOUBLE', 'name': 'load_LPPPu_2_', 'value': '0.14'},
+        {'type': 'DOUBLE', 'name': 'load_tP0_2_', 'value': '0.2'},
+        {'type': 'DOUBLE', 'name': 'load_tPP0_2_', 'value': '0.0026'},
+        {'type': 'DOUBLE', 'name': 'load_H_2_', 'value': '0.1'},
+        {'type': 'DOUBLE', 'name': 'load_torqueExponent_2_', 'value': '2'},
+        {'type': 'DOUBLE', 'name': 'load_Utrip1Pu_2_', 'value': '0.58'},
+        {'type': 'DOUBLE', 'name': 'load_tTrip1Pu_2_', 'value': '0.03'},
+        {'type': 'DOUBLE', 'name': 'load_shareTrip1Pu_2_', 'value': '0.2'},
+        {'type': 'DOUBLE', 'name': 'load_Ureconnect1Pu_2_', 'value': '0.68'},
+        {'type': 'DOUBLE', 'name': 'load_tReconnect1Pu_2_', 'value': '0.05'},
+        {'type': 'DOUBLE', 'name': 'load_Utrip2Pu_2_', 'value': '0.53'},
+        {'type': 'DOUBLE', 'name': 'load_tTrip2Pu_2_', 'value': '0.03'},
+        {'type': 'DOUBLE', 'name': 'load_shareTrip2Pu_2_', 'value': '0.3'},
+        {'type': 'DOUBLE', 'name': 'load_Ureconnect2Pu_2_', 'value': '0.62'},
+        {'type': 'DOUBLE', 'name': 'load_tReconnect2Pu_2_', 'value': '0.05'},
     ]
     for par_attrib in par_attribs:
         etree.SubElement(motor_par_set, etree.QName(NAMESPACE, 'par'), par_attrib)
@@ -500,27 +554,6 @@ def write_disturbance_files(network: pp.network.Network, network_name, book, par
         doc.write(etree.tostring(fic_root, pretty_print = True, xml_declaration = True, encoding='UTF-8'))
 
 
-"""
-<multipleJobs xmlns="http://www.rte-france.com/dynawo">
-	<scenarios jobsFile="CIGRE_MV_Wind.jobs">
-        <scenario id="VDrop1" dydFile="VDrop1.dyd"/>
-        <scenario id="VDrop2" dydFile="VDrop2.dyd"/>
-        <scenario id="VDrop3" dydFile="VDrop3.dyd"/>
-        <scenario id="VDrop4" dydFile="VDrop4.dyd"/>
-        <scenario id="VDrop5" dydFile="VDrop5.dyd"/>
-        <scenario id="VDrop6" dydFile="VDrop6.dyd"/>
-        <scenario id="VDrop7" dydFile="VDrop7.dyd"/>
-        <scenario id="VDrop8" dydFile="VDrop8.dyd"/>
-        <scenario id="VDrop9" dydFile="VDrop9.dyd"/>
-        <scenario id="VDrop10" dydFile="VDrop10.dyd"/>
-        <scenario id="VDrop11" dydFile="VDrop11.dyd"/>
-        <scenario id="VDrop12" dydFile="VDrop12.dyd"/>
-        <scenario id="VDrop13" dydFile="VDrop13.dyd"/>
-        <scenario id="VDrop14" dydFile="VDrop14.dyd"/>
-	</scenarios>
-</multipleJobs>
-"""
-
 def add_reactive_compensation(network: pp.network.Network, book, reactive_compensation):
     bus_sheet = book.sheet_by_name('Buses')
     slack_bus = get_row_values(bus_sheet, 29)[1]  # Slack bus is assumed to be the first in the list
@@ -529,7 +562,7 @@ def add_reactive_compensation(network: pp.network.Network, book, reactive_compen
                         bus_id='B-{}'.format(slack_bus), p0=0, q0=reactive_compensation)
 
 
-def add_distributed_energy_resources(network: pp.network.Network, network_name, book, base_factor, dyd_root, par_root, der_installed_share, der_capacity_factor, random_generator = None, der_pf=1):
+def add_distributed_energy_resources(network: pp.network.Network, network_name, book, base_factor, dyd_root, par_root, der_installed_share, der_capacity_factor, der_legacy_share, random_generator = None, der_pf=1):
     # Put distributed generation in parallel with all loads
     if der_installed_share == 0:
         return
@@ -537,102 +570,145 @@ def add_distributed_energy_resources(network: pp.network.Network, network_name, 
     for row_idx in range(29, load_sheet.nrows):
         values = get_row_values(load_sheet, row_idx)
         der_bus = values[1]
-        der_id = values[2]
-        der_p_max = values[3] * base_factor * der_installed_share
-        der_p = der_p_max * der_capacity_factor
-        der_q = der_p * (1-der_pf**2)**0.5
-        if der_p == 0 and der_q == 0:
-            continue
-        load_id = 'Load-{}_{}'.format(der_bus, der_id)  # ID of the load to which the DER is added in parallel to
-        der_id = 'DER-{}_{}'.format(der_bus, der_id)
-        network.create_generators(id=der_id, voltage_level_id='VL-{}'.format(load_id), bus_id='B-{}'.format(load_id),
-                              target_p=der_p, target_q=der_q, voltage_regulator_on=False, min_p=0, max_p=der_p)
 
-        # Dynamic data
-        gen_attrib = {'id': der_id, 'lib': 'GenericIBG', 'parFile': network_name + '.par', 'parId': der_id, 'staticId': der_id}
-        gen = etree.SubElement(dyd_root, etree.QName(NAMESPACE, 'blackBoxModel'), gen_attrib)
-        etree.SubElement(gen, etree.QName(NAMESPACE, 'macroStaticRef'), {'id': 'PV'})
-        etree.SubElement(dyd_root, etree.QName(NAMESPACE, 'macroConnect'), {'id1': der_id, 'id2': 'NETWORK', 'connector': 'PV-CONNECTOR'})
-        etree.SubElement(dyd_root, etree.QName(NAMESPACE, 'connect'), {'id1': der_id, 'var1': 'ibg_omegaRefPu', 'id2': 'OMEGA_REF', 'var2': 'omegaRef_0_value'})
+        for typ in ['legacy', 'G99']:
+            der_p_max = values[3] * base_factor * der_installed_share
+            if typ == 'legacy':
+                der_p_max *= der_legacy_share
+            elif typ == 'G99':
+                der_p_max *= (1-der_legacy_share)
+            der_p = der_p_max * der_capacity_factor
+            der_q = der_p * (1-der_pf**2)**0.5
+            if der_p == 0 and der_q == 0:
+                continue
 
-        gen_par_set = etree.SubElement(par_root, etree.QName(NAMESPACE, 'set'), {'id' : der_id})
-        if random_generator:
-            u_min = random_generator.uniform(0.05, 0.8)
-            par_attribs = [
+            der_id = values[2]
+            load_id = 'Load-{}_{}'.format(der_bus, der_id)  # ID of the load to which the DER is added in parallel to
+            der_id = 'DER-{}_{}_{}'.format(der_bus, der_id, typ)
+            network.create_generators(id=der_id, voltage_level_id='VL-{}'.format(load_id), bus_id='B-{}'.format(load_id),
+                                target_p=der_p, target_q=der_q, voltage_regulator_on=False, min_p=0, max_p=der_p_max)
+
+            # Dynamic data
+            gen_attrib = {'id': der_id, 'lib': 'der_a_GenericLVRT', 'parFile': network_name + '.par', 'parId': der_id, 'staticId': der_id}
+            gen = etree.SubElement(dyd_root, etree.QName(NAMESPACE, 'blackBoxModel'), gen_attrib)
+            etree.SubElement(gen, etree.QName(NAMESPACE, 'macroStaticRef'), {'id': 'PV'})
+            etree.SubElement(dyd_root, etree.QName(NAMESPACE, 'macroConnect'), {'id1': der_id, 'id2': 'NETWORK', 'connector': 'PV-CONNECTOR'})
+            etree.SubElement(dyd_root, etree.QName(NAMESPACE, 'connect'), {'id1': der_id, 'var1': 'ibg_omegaRefPu', 'id2': 'OMEGA_REF', 'var2': 'omegaRef_0_value'})
+
+            gen_par_set = etree.SubElement(par_root, etree.QName(NAMESPACE, 'set'), {'id' : der_id})
+
+            if typ == 'legacy':
+                par_attribs = [
+                    {'type': 'BOOL', 'name': 'ibg_PPriority', 'value': 'true'},
+                    {'type': 'DOUBLE', 'name': 'ibg_KQsupportPu', 'value': '0'},
+                    {'type': 'DOUBLE', 'name': 'ibg_ULVRTMinPu', 'value': '0.87'},
+                    {'type': 'DOUBLE', 'name': 'ibg_ULVRTIntPu', 'value': '0.8'},
+                    {'type': 'DOUBLE', 'name': 'ibg_ULVRTArmingPu', 'value': '0.8'},
+                    {'type': 'DOUBLE', 'name': 'ibg_tLVRTMin', 'value': '1'},
+                    {'type': 'DOUBLE', 'name': 'ibg_tLVRTInt', 'value': '1'},
+                    {'type': 'DOUBLE', 'name': 'ibg_tLVRTMax', 'value': '2.5'},
+                ]
+            elif typ == 'G99':
+                par_attribs = [
+                    {'type': 'BOOL', 'name': 'ibg_PPriority', 'value': 'false'},
+                    {'type': 'DOUBLE', 'name': 'ibg_KQsupportPu', 'value': '2.5'},
+                    {'type': 'DOUBLE', 'name': 'ibg_ULVRTMinPu', 'value': '0.1'},
+                    {'type': 'DOUBLE', 'name': 'ibg_ULVRTIntPu', 'value': '0.1'},
+                    {'type': 'DOUBLE', 'name': 'ibg_ULVRTArmingPu', 'value': '0.85'},
+                    {'type': 'DOUBLE', 'name': 'ibg_tLVRTMin', 'value': '0.14'},
+                    {'type': 'DOUBLE', 'name': 'ibg_tLVRTInt', 'value': '0.14'},
+                    {'type': 'DOUBLE', 'name': 'ibg_tLVRTMax', 'value': '2.2'},
+                ]
+            else:
+                raise NotImplementedError()
+            par_attribs += [
                 {'type': 'DOUBLE', 'name': 'ibg_IMaxPu', 'value': '1.1'},
-                {'type': 'DOUBLE', 'name': 'ibg_UPLLFreezePu', 'value': '0.1'},
-                {'type': 'DOUBLE', 'name': 'ibg_UQPrioPu', 'value': '0.01'},
-                {'type': 'DOUBLE', 'name': 'ibg_US1', 'value': '0.9'},
-                {'type': 'DOUBLE', 'name': 'ibg_US2', 'value': '1.1'},
-                {'type': 'DOUBLE', 'name': 'ibg_kRCI', 'value': '0'},  # 2.5
-                {'type': 'DOUBLE', 'name': 'ibg_kRCA', 'value': '0'},
-                {'type': 'DOUBLE', 'name': 'ibg_m', 'value': '0.1'},
-                {'type': 'DOUBLE', 'name': 'ibg_n', 'value': '0.1'},
-                {'type': 'DOUBLE', 'name': 'ibg_tG', 'value': '0.1'},
-                {'type': 'DOUBLE', 'name': 'ibg_Tm', 'value': '0.1'},
-                {'type': 'DOUBLE', 'name': 'ibg_IpSlewMaxPu', 'value': '1'},
-                {'type': 'DOUBLE', 'name': 'ibg_IqSlewMaxPu', 'value': '5'},
-                {'type': 'DOUBLE', 'name': 'ibg_tLVRTMin', 'value': '0.14'},
-                {'type': 'DOUBLE', 'name': 'ibg_tLVRTInt', 'value': '0.14'},
-                {'type': 'DOUBLE', 'name': 'ibg_tLVRTMax', 'value': '2.2'},
-                {'type': 'DOUBLE', 'name': 'ibg_ULVRTMinPu', 'value': str(u_min)},
-                {'type': 'DOUBLE', 'name': 'ibg_ULVRTIntPu', 'value': str(u_min)},
-                {'type': 'DOUBLE', 'name': 'ibg_ULVRTArmingPu', 'value': '0.9'},
+                {'type': 'DOUBLE', 'name': 'ibg_tFilterU', 'value': '0.02'},
+                {'type': 'DOUBLE', 'name': 'ibg_RecoveringShare', 'value': '0'},
+                {'type': 'DOUBLE', 'name': 'ibg_tFilterOmega', 'value': '0.02'},
+                {'type': 'DOUBLE', 'name': 'ibg_tP', 'value': '0.02'},
+                {'type': 'DOUBLE', 'name': 'ibg_tG', 'value': '0.02'},
+                {'type': 'DOUBLE', 'name': 'ibg_tPord', 'value': '0.02'},
+                {'type': 'DOUBLE', 'name': 'ibg_tIq', 'value': '0.02'},
+                {'type': 'DOUBLE', 'name': 'ibg_fDeadZoneMaxPu', 'value': '0.4'},
+                {'type': 'DOUBLE', 'name': 'ibg_fDeadZoneMinPu', 'value': '-1'},
+                {'type': 'DOUBLE', 'name': 'ibg_DdnPu', 'value': '10'},
+                {'type': 'DOUBLE', 'name': 'ibg_DupPu', 'value': '0'},
+                {'type': 'DOUBLE', 'name': 'ibg_feMaxPu', 'value': '99'},
+                {'type': 'DOUBLE', 'name': 'ibg_feMinPu', 'value': '-99'},
+                {'type': 'DOUBLE', 'name': 'ibg_Kpg', 'value': '0.1'},
+                {'type': 'DOUBLE', 'name': 'ibg_Kig', 'value': '10'},
+                {'type': 'DOUBLE', 'name': 'ibg_PMaxPu', 'value': '1'},
+                {'type': 'DOUBLE', 'name': 'ibg_PMinPu', 'value': '0'},
+                {'type': 'DOUBLE', 'name': 'ibg_DPMaxPu', 'value': '0.5'},
+                {'type': 'DOUBLE', 'name': 'ibg_DPMinPu', 'value': '-0.5'},
+                {'type': 'BOOL', 'name': 'ibg_Freq_flag', 'value': 'true'},
                 {'type': 'DOUBLE', 'name': 'ibg_OmegaMaxPu', 'value': '1.05'},
-                {'type': 'DOUBLE', 'name': 'ibg_OmegaDeadBandPu', 'value': '1.01'},
                 {'type': 'DOUBLE', 'name': 'ibg_OmegaMinPu', 'value': '0.95'},
-                {'type': 'DOUBLE', 'name': 'ibg_tFilterOmega', 'value': '0.1'},
-                {'type': 'DOUBLE', 'name': 'ibg_tFilterU', 'value': '0.01'},
-                {'type': 'DOUBLE', 'name': 'ibg_UMaxPu', 'value': '1.2'},
-                {'type': 'DOUBLE', 'name': 'ibg_Kf', 'value': '0'},
-                {'type': 'DOUBLE', 'name': 'ibg_tf', 'value': '0.1'},
+                {'type': 'DOUBLE', 'name': 'ibg_tOmegaMaxPu', 'value': '3'},
+                {'type': 'DOUBLE', 'name': 'ibg_tOmegaMinPu', 'value': '3'},
+                {'type': 'DOUBLE', 'name': 'ibg_IpRateLimMax', 'value': '2.5'},
+                {'type': 'DOUBLE', 'name': 'ibg_IpRateLimMin', 'value': '-999'},
+                {'type': 'DOUBLE', 'name': 'ibg_VRefPu', 'value': '1'},
+                {'type': 'DOUBLE', 'name': 'ibg_VDeadzoneMaxPu', 'value': '0.1'},
+                {'type': 'DOUBLE', 'name': 'ibg_VDeadzoneMinPu', 'value': '-0.1'},
+                {'type': 'DOUBLE', 'name': 'ibg_iQSupportMaxPu', 'value': '999'},
+                {'type': 'DOUBLE', 'name': 'ibg_iQSupportMinPu', 'value': '-999'},
             ]
-        else:
-            par_attribs = [
-                {'type': 'DOUBLE', 'name': 'ibg_IMaxPu', 'value': '1.1'},
-                {'type': 'DOUBLE', 'name': 'ibg_UPLLFreezePu', 'value': '0.1'},
-                {'type': 'DOUBLE', 'name': 'ibg_UQPrioPu', 'value': '0.01'},
-                {'type': 'DOUBLE', 'name': 'ibg_US1', 'value': '0.9'},
-                {'type': 'DOUBLE', 'name': 'ibg_US2', 'value': '1.1'},
-                {'type': 'DOUBLE', 'name': 'ibg_kRCI', 'value': '0'},  # 2.5
-                {'type': 'DOUBLE', 'name': 'ibg_kRCA', 'value': '0'},
-                {'type': 'DOUBLE', 'name': 'ibg_m', 'value': '0.1'},
-                {'type': 'DOUBLE', 'name': 'ibg_n', 'value': '0.1'},
-                {'type': 'DOUBLE', 'name': 'ibg_tG', 'value': '0.1'},
-                {'type': 'DOUBLE', 'name': 'ibg_Tm', 'value': '0.1'},
-                {'type': 'DOUBLE', 'name': 'ibg_IpSlewMaxPu', 'value': '1'},
-                {'type': 'DOUBLE', 'name': 'ibg_IqSlewMaxPu', 'value': '5'},
-                {'type': 'DOUBLE', 'name': 'ibg_tLVRTMin', 'value': '0.14'},
-                {'type': 'DOUBLE', 'name': 'ibg_tLVRTInt', 'value': '0.14'},
-                {'type': 'DOUBLE', 'name': 'ibg_tLVRTMax', 'value': '2.2'},
-                {'type': 'DOUBLE', 'name': 'ibg_ULVRTMinPu', 'value': '0.8'},
-                {'type': 'DOUBLE', 'name': 'ibg_ULVRTIntPu', 'value': '0.8'},
-                {'type': 'DOUBLE', 'name': 'ibg_ULVRTArmingPu', 'value': '0.9'},
-                {'type': 'DOUBLE', 'name': 'ibg_OmegaMaxPu', 'value': '1.05'},
-                {'type': 'DOUBLE', 'name': 'ibg_OmegaDeadBandPu', 'value': '1.01'},
-                {'type': 'DOUBLE', 'name': 'ibg_OmegaMinPu', 'value': '0.95'},
-                {'type': 'DOUBLE', 'name': 'ibg_tFilterOmega', 'value': '0.1'},
-                {'type': 'DOUBLE', 'name': 'ibg_tFilterU', 'value': '0.01'},
-                {'type': 'DOUBLE', 'name': 'ibg_UMaxPu', 'value': '1.2'},
-                {'type': 'DOUBLE', 'name': 'ibg_Kf', 'value': '0'},
-                {'type': 'DOUBLE', 'name': 'ibg_tf', 'value': '0.1'},
-            ]
-        par_attribs += [
+            """
+            {'type': 'DOUBLE', 'name': 'ibg_IMaxPu', 'value': '1.1'},
+            {'type': 'DOUBLE', 'name': 'ibg_UPLLFreezePu', 'value': '0.1'},
+            {'type': 'DOUBLE', 'name': 'ibg_UQPrioPu', 'value': '0.01'},
+            {'type': 'DOUBLE', 'name': 'ibg_US1', 'value': '0.9'},
+            {'type': 'DOUBLE', 'name': 'ibg_US2', 'value': '1.1'},
+            {'type': 'DOUBLE', 'name': 'ibg_kRCI', 'value': '0'},  # 2.5
+            {'type': 'DOUBLE', 'name': 'ibg_kRCA', 'value': '0'},
+            {'type': 'DOUBLE', 'name': 'ibg_m', 'value': '0.1'},
+            {'type': 'DOUBLE', 'name': 'ibg_n', 'value': '0.1'},
+            {'type': 'DOUBLE', 'name': 'ibg_tG', 'value': '0.1'},
+            {'type': 'DOUBLE', 'name': 'ibg_Tm', 'value': '0.1'},
+            {'type': 'DOUBLE', 'name': 'ibg_IpSlewMaxPu', 'value': '1'},
+            {'type': 'DOUBLE', 'name': 'ibg_IqSlewMaxPu', 'value': '5'},
+            {'type': 'DOUBLE', 'name': 'ibg_tLVRTMin', 'value': '0.14'},
+            {'type': 'DOUBLE', 'name': 'ibg_tLVRTInt', 'value': '0.14'},
+            {'type': 'DOUBLE', 'name': 'ibg_tLVRTMax', 'value': '2.2'},
+            {'type': 'DOUBLE', 'name': 'ibg_ULVRTArmingPu', 'value': '0.9'},
+            {'type': 'DOUBLE', 'name': 'ibg_OmegaMaxPu', 'value': '1.05'},
+            {'type': 'DOUBLE', 'name': 'ibg_OmegaDeadBandPu', 'value': '1.01'},
+            {'type': 'DOUBLE', 'name': 'ibg_OmegaMinPu', 'value': '0.95'},
+            {'type': 'DOUBLE', 'name': 'ibg_tFilterOmega', 'value': '0.1'},
+            {'type': 'DOUBLE', 'name': 'ibg_tFilterU', 'value': '0.01'},
+            {'type': 'DOUBLE', 'name': 'ibg_UMaxPu', 'value': '1.2'},
+            {'type': 'DOUBLE', 'name': 'ibg_Kf', 'value': '0'},
+            {'type': 'DOUBLE', 'name': 'ibg_tf', 'value': '0.1'},
             {'type': 'DOUBLE', 'name': 'ibg_PLLFreeze_Ki', 'value': '20'},
             {'type': 'DOUBLE', 'name': 'ibg_PLLFreeze_Kp', 'value': '3'},
-        ]
-        for par_attrib in par_attribs:
-            etree.SubElement(gen_par_set, etree.QName(NAMESPACE, 'par'), par_attrib)
+            """
+            """
+            if random_generator:
+                u_min = random_generator.uniform(0.05, 0.8)
+                par_attribs += [
+                    {'type': 'DOUBLE', 'name': 'ibg_ULVRTMinPu', 'value': str(u_min)},
+                    {'type': 'DOUBLE', 'name': 'ibg_ULVRTIntPu', 'value': str(u_min)},
+                ]
+            else:
+                par_attribs += [
+                    {'type': 'DOUBLE', 'name': 'ibg_ULVRTMinPu', 'value': '0.8'},
+                    {'type': 'DOUBLE', 'name': 'ibg_ULVRTIntPu', 'value': '0.8'},
+                ]
+            """
+            for par_attrib in par_attribs:
+                etree.SubElement(gen_par_set, etree.QName(NAMESPACE, 'par'), par_attrib)
 
-        references = [
-            {'name': 'ibg_SNom', 'origData': 'IIDM', 'origName': 'pMax', 'type': 'DOUBLE'},
-            {'name': 'ibg_P0Pu', 'origData': 'IIDM', 'origName': 'p_pu', 'type': 'DOUBLE'},
-            {'name': 'ibg_Q0Pu', 'origData': 'IIDM', 'origName': 'q_pu', 'type': 'DOUBLE'},
-            {'name': 'ibg_U0Pu', 'origData': 'IIDM', 'origName': 'v_pu', 'type': 'DOUBLE'},
-            {'name': 'ibg_UPhase0', 'origData': 'IIDM', 'origName': 'angle_pu', 'type': 'DOUBLE'},
-        ]
-        for ref in references:
-            etree.SubElement(gen_par_set, etree.QName(NAMESPACE, 'reference'), ref)
+            references = [
+                {'name': 'ibg_SNom', 'origData': 'IIDM', 'origName': 'pMax', 'type': 'DOUBLE'},
+                {'name': 'ibg_P0Pu', 'origData': 'IIDM', 'origName': 'p_pu', 'type': 'DOUBLE'},
+                {'name': 'ibg_Q0Pu', 'origData': 'IIDM', 'origName': 'q_pu', 'type': 'DOUBLE'},
+                {'name': 'ibg_U0Pu', 'origData': 'IIDM', 'origName': 'v_pu', 'type': 'DOUBLE'},
+                {'name': 'ibg_UPhase0', 'origData': 'IIDM', 'origName': 'angle_pu', 'type': 'DOUBLE'},
+            ]
+            for ref in references:
+                etree.SubElement(gen_par_set, etree.QName(NAMESPACE, 'reference'), ref)
 
 
 def run_loadflow(network: pp.network.Network, lowest_regulating_transformer):
@@ -771,7 +847,7 @@ def dump_network_file(network: pp.network.Network, output_path):
     # network.write_network_area_diagram_svg(file_name + '.svg')
 
 
-def ukgds_to_iidm(input_file, load_ratio, motor_share, der_installed_share, der_capacity_factor, output_path=None, seed=None):
+def ukgds_to_dynawo(input_file, load_ratio, der_installed_share, der_capacity_factor, der_legacy_share, output_path=None, seed=None):
     random_generator = None
     if seed:
         random_generator = random.Random(seed)
@@ -795,7 +871,7 @@ def ukgds_to_iidm(input_file, load_ratio, motor_share, der_installed_share, der_
     add_lines(network, book, baseMVA=(baseMVA*base_factor))
     add_transformers(network, network_name, book, baseMVA=(baseMVA*base_factor))
     add_shunts(network, book, baseMVA=(baseMVA*base_factor))
-    add_loads(network, network_name, book, base_factor, dyd_root, par_root, motor_share)
+    add_loads(network, network_name, book, base_factor, dyd_root, par_root, seed)
     add_interconnections(network, network_name, book)
     add_grid_supply(network, network_name, book, dyd_root, par_root)
 
@@ -805,7 +881,7 @@ def ukgds_to_iidm(input_file, load_ratio, motor_share, der_installed_share, der_
     show_voltage_profile(network, 'figs/' + network_name + '_peak', book)
 
     update_loads(network, load_ratio)
-    add_distributed_energy_resources(network, network_name, book, base_factor, dyd_root, par_root, der_installed_share, der_capacity_factor, random_generator)
+    add_distributed_energy_resources(network, network_name, book, base_factor, dyd_root, par_root, der_installed_share, der_capacity_factor, der_legacy_share, random_generator)
 
     # Rerun loadflow with current load and DERs but constant tap settings for the low voltage transformers (manual tap changers)
     run_loadflow(network, lowest_regulating_transformer=25)  # 132/33kV and 33/11kV tap changers are all assumed to be automatic
@@ -831,62 +907,59 @@ def ukgds_to_iidm(input_file, load_ratio, motor_share, der_installed_share, der_
     return network
 
 
+def build_network_and_simulate(network_name, load_ratio, der_installed_share, der_capacity_factor, der_legacy_share, seed=None, rerun_simulations=True):
+    input_file = os.path.join('ukgds', network_name + '.xls')
+    if seed is not None:
+        output_dir = os.path.join('dynawo_files', 'Random', str(seed))
+    else:
+        output_dir = os.path.join('dynawo_files', 'Deterministic')
+    Path(output_dir).mkdir(parents=True, exist_ok=True)
+    network_name, ext = os.path.basename(input_file).rsplit('.', 1)
+    output_path = os.path.join(output_dir, network_name)
+
+    faults = ['Fault_{}'.format(i) for i in range(1, 14 + 1)]
+    output_curve_path = [os.path.join(output_dir, fault, network_name, 'curves', 'curves.csv') for fault in faults]
+    fic_path = os.path.join(output_dir, network_name + '_fic.xml')
+    if any(not Path(path).exists() for path in output_curve_path) or rerun_simulations:
+        ukgds_to_dynawo(input_file, load_ratio, der_installed_share, der_capacity_factor, der_legacy_share, output_path, seed)
+
+        # cmd = [DYNAWO_PATH, 'jobs', os.path.join(output_dir, network_name + '.jobs')]
+        cmd = [DYNAWO_ALGO_PATH, 'SA', '--directory', output_dir, '--input', network_name + '_fic.xml', '--output', network_name + '_aggregatedResults.xml', '--nbThreads', '5']
+        subprocess.run(cmd)
+
+    return output_curve_path, network_name, fic_path
+
+
 if __name__ == '__main__':
     RERUN_SIMULATIONS = True
-    RANDOMISE = False
-    # der_capacity_factor = 1
-    der_installed_share = 0.5
+    RANDOMISE = True
     load_ratio = 1
-    for motor_share in [0.3]:
-        for der_capacity_factor in [0.5]: #[0.2, 0.6, 1]:  # der_installed_share in [0.5]:
-            def build_network_and_simulate(network_name, seed):
-                input_file = os.path.join('ukgds', network_name + '.xls')
-                if RANDOMISE:
-                    output_dir = os.path.join('dynawo_files', 'Random', str(seed))
-                else:
-                    output_dir = os.path.join('dynawo_files', 'Deterministic')
-                Path(output_dir).mkdir(parents=True, exist_ok=True)
-                network_name, ext = os.path.basename(input_file).rsplit('.', 1)
-                output_path = os.path.join(output_dir, network_name)
+    der_installed_share = 0.8
+    der_legacy_share = 0.5
+    der_capacity_factor = 1
 
-                faults = ['Fault_{}'.format(i) for i in range(1, 14 + 1)]
-                output_curve_path = [os.path.join(output_dir, fault, network_name, 'curves', 'curves.csv') for fault in faults]
-                if any(not Path(path).exists() for path in output_curve_path) or RERUN_SIMULATIONS:
-                    ukgds_to_iidm(input_file, load_ratio, motor_share, der_installed_share, der_capacity_factor, output_path, seed)
+    if RANDOMISE:
+        seeds = range(3)
+    else:
+        seeds = [None]
+    network_names = ['ehv{}'.format(i) for i in range(1, 7) if i != 4]
 
-                    # cmd = [DYNAWO_PATH, 'jobs', os.path.join(output_dir, network_name + '.jobs')]
-                    cmd = [DYNAWO_ALGO_PATH, 'SA', '--directory', output_dir, '--input', network_name + '_fic.xml', '--output', network_name + '_aggregatedResults.xml']
-                    subprocess.run(cmd)
+    PARALLEL = False
+    if PARALLEL:
+        results = Parallel(n_jobs=5)(delayed(build_network_and_simulate)(network_name, load_ratio, der_installed_share, der_capacity_factor, der_legacy_share, seed, RERUN_SIMULATIONS) for network_name in network_names for seed in seeds)
+    else:
+        results = []
+        for network_name in network_names:
+            for seed in seeds:
+                results.append(build_network_and_simulate(network_name, load_ratio, der_installed_share, der_capacity_factor, der_legacy_share, seed, RERUN_SIMULATIONS))
 
-                return output_curve_path, network_name
+    output_curve_paths = []
+    network_names = []
+    for result in results:
+        output_curve_paths.append(result[0])
+        network_names.append(result[1])
 
-            # for i in range(1, 7):
-            #     if i == 4:
-            #         continue
-            #     for seed in range(5):
-            #         build_network_and_simulate(i, seed)
-            if RANDOMISE:
-                seeds = range(5)
-            else:
-                seeds = [None]
-            network_names = ['ehv{}'.format(i) for i in range(1, 7) if i != 4]
-
-            PARALLEL = True
-            if PARALLEL:
-                results = Parallel(n_jobs=6)(delayed(build_network_and_simulate)(network_name, seed) for network_name in network_names for seed in seeds)
-            else:
-                results = []
-                for network_name in network_names:
-                    for seed in seeds:
-                        results.append(build_network_and_simulate(network_name, seed))
-
-            output_curve_paths = []
-            network_names = []
-            for result in results:
-                output_curve_paths.append(result[0])
-                network_names.append(result[1])
-
-            fig_name = os.path.join('figs', 'power' + '_der_' + str(der_installed_share) + '_' + str(der_capacity_factor) + '_motor_' + str(motor_share) + '.pdf')
-            merge_curves.plot_power(output_curve_paths, network_names, fig_name)
-            # fig_name = os.path.join('figs', 'voltage' + '_der_' + str(der_installed_share) + '_' + str(der_capacity_factor) + '_motor_' + str(motor_share) + '.pdf')
-            # merge_curves.plot_voltages(output_curve_paths, network_names, fig_name)
+    fig_name = os.path.join('figs', 'power' + '_load_' + str(load_ratio) + '_der_' + str(der_installed_share) + '_' + str(der_capacity_factor) + '_legacy_' + str(der_legacy_share) + '.pdf')
+    merge_curves.plot_power(output_curve_paths, network_names, fig_name)
+    fig_name = os.path.join('figs', 'voltage' + '_load_' + str(load_ratio) + '_der_' + str(der_installed_share) + '_' + str(der_capacity_factor) + '_legacy_' + str(der_legacy_share) + '.pdf')
+    merge_curves.plot_voltages(output_curve_paths, network_names, fig_name)

@@ -38,7 +38,7 @@ def mergeCurvesFromFics(fic_MULTIPLEs, curve_names, time_precision, write_to_csv
             scenario_ids.append(scenario_id)
 
         jobsFile = scenarios.get('jobsFile')
-        jobs = etree.parse(os.path.join(working_dir, os.path.dirname(fic_MULTIPLE), jobsFile))
+        jobs = etree.parse(os.path.join(working_dir, jobsFile))
         jobs_root = jobs.getroot()
         jobs_namespace = jobs_root.nsmap
         jobs_prefix_root = jobs_root.prefix
@@ -70,7 +70,7 @@ def mergeCurvesFromFics(fic_MULTIPLEs, curve_names, time_precision, write_to_csv
 
         output_curves_one_fic = []
         for scenario_id in scenario_ids:
-            input_csv = os.path.join(working_dir, os.path.dirname(fic_MULTIPLE), scenario_id, sim_outputs_dir, 'curves', 'curves.csv')
+            input_csv = os.path.join(working_dir, scenario_id, sim_outputs_dir, 'curves', 'curves.csv')
 
             with open(input_csv) as csvfile:
                 spamreader = csv.reader(csvfile, delimiter=';')
@@ -85,6 +85,8 @@ def mergeCurvesFromFics(fic_MULTIPLEs, curve_names, time_precision, write_to_csv
                     for i in range(len(curve_names)):
                         input_curves[i].append(float(row[indexes[i]]))
 
+            # if input_time_axis[-1] < stopTime - 0.1:
+            #     raise RuntimeError('Dynawo failed the simulation', scenario_id, input_time_axis[-1], stopTime)
             output_curves = [np.interp(output_time_axis, input_time_axis, input_curves[i]) for i in range(len(curve_names))]
             output_curves_one_fic.append(output_curves)
         scenario_ids_all_fic[fic_MULTIPLE] = scenario_ids
@@ -114,7 +116,7 @@ def mergeCurvesFromFics(fic_MULTIPLEs, curve_names, time_precision, write_to_csv
                         for curves_one_fic in output_curves_all_fic.values():
                             row.append(curves_one_fic[scenario_nb][curve_index][t])
                     spamwriter.writerow(row)
-    
+
     # output_curves_all_fic -> np.narray
     nb_curve_names = len(curve_names)
     nb_runs = len(fic_MULTIPLEs)
@@ -124,7 +126,7 @@ def mergeCurvesFromFics(fic_MULTIPLEs, curve_names, time_precision, write_to_csv
     for curve_nb in range(nb_curve_names):
         for scenario_nb in range(nb_scenarios_per_fic):
             for run_nb in range(len(output_curves_all_fic.values())):
-                curves[curve_nb, scenario_nb, run_nb, :] = list(output_curves_all_fic.values())[run_nb][scenario_nb][curve_nb]   
+                curves[curve_nb, scenario_nb, run_nb, :] = list(output_curves_all_fic.values())[run_nb][scenario_nb][curve_nb]
 
     return curves
 

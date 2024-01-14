@@ -23,7 +23,7 @@
     <par type="DOUBLE" name="transformer_tNext_THT" value="10"/>
     <par type="DOUBLE" name="transformer_tolV" value="0.015"/>
   </set>
-  <set id="IDAOrder2">
+  <set id="SolverIDA">
     <par type="INT" name="order" value="2"/>
     <par type="DOUBLE" name="initStep" value="1e-7"/>
     <par type="DOUBLE" name="minStep" value="1e-7"/>
@@ -36,7 +36,7 @@
   <set id="SolverSIM">
     <par type="DOUBLE" name="hMin" value="1e-7"/>
     <par type="DOUBLE" name="minimalAcceptableStep" value="1e-7"/>
-    <par type="DOUBLE" name="hMax" value="0.002"/>
+    <par type="DOUBLE" name="hMax" value="0.005"/>
     <par type="DOUBLE" name="kReduceStep" value="0.5"/>
     <par type="INT" name="maxNewtonTry" value="20"/>
     <par type="STRING" name="linearSolverName" value="KLU"/>

@@ -79,7 +79,7 @@ class DynamicParameter:
         self.set_id = set_id
         self.id = id
         self.value = value
-    
+
     def __eq__(self, other):
         if self.set_id == other.set_id:
             if self.id == other.id:
@@ -95,7 +95,7 @@ class DynamicParameterList:
 
     def __getitem__(self, item):
         return self.l[item]
-    
+
     def append(self, new_parameter: DynamicParameter):
         """
         Append a static parameter to self, throws in case of duplicate
@@ -147,7 +147,7 @@ def randomiseDynamicParams(input_par, input_csv):
                     set_id = parameter.getparent().get('id')
                     value = getRandom(parameter.attrib['value'], parameter.attrib['type'], distribution, distribution_parameters)
                     random_dynamic_parameters.append(DynamicParameter(set_id, paramId, value))
-            
+
             elif paramSetId[-1] == "*":
                 filter = paramSetId[:-1]
                 found_parameter_sets = findParameterSets(par_root, filter)
@@ -191,7 +191,7 @@ class StaticParameter:
         self.component_name = component_name
         self.id = id
         self.value = value
-    
+
     def __eq__(self, other):
         if self.component_type == other.component_type:
             if self.component_name == other.component_name:
@@ -205,7 +205,7 @@ class StaticParameter:
 class StaticParameterList:
     def __init__(self):
         self.l = []
-    
+
     def __getitem__(self, item):
         return self.l[item]
 
@@ -245,7 +245,7 @@ def randomiseStaticParams(input_iidm, input_csv):
             distribution = row[3]
             distribution_parameters = row[4:8]
             max_value_ref = row[9]
-            
+
             if componentType == '*':
                 raise NotImplementedError('Wildcard not implemented for Component_type (and is not really useful)')
 
@@ -299,7 +299,7 @@ def randomiseStaticParams(input_iidm, input_csv):
     return random_static_parameters
 
 
-def writeStaticParams(static_parameters, input_iidm, output_dir, slack_load_id, target_Q=None, slack_gen_id=None, slack_gen_type=None):
+def writeStaticParams(static_parameters, input_iidm, output_dir, slack_load_id, target_P, target_Q=None, slack_gen_id=None, slack_gen_type=None):
     """
     Set new values of parameters in the input iidm, restore the load/generation balance (and target_Q if given), and write the resulting iidm to output_dir.
 
@@ -327,6 +327,8 @@ def writeStaticParams(static_parameters, input_iidm, output_dir, slack_load_id, 
             components = n.get_buses()
         elif component_type == 'Generator':
             components = n.get_generators()
+        elif component_type == 'Transformer':
+            components = n.get_2_windings_transformers()
         else:
             raise Exception("Component type '%s' not considered" % component_type)
 
@@ -342,39 +344,86 @@ def writeStaticParams(static_parameters, input_iidm, output_dir, slack_load_id, 
             n.update_buses(new_param_df)
         elif component_type == 'Generator':
             n.update_generators(new_param_df)
+        elif component_type == 'Transformer':
+            n.update_2_windings_transformers(new_param_df)
         else:
             raise Exception("Component type '%s' not considered" % component_type)
-    
-    # Restore the load/generation balance and target_Q
-    lf_parameters = pp.loadflow.Parameters(distributed_slack=False)    
-    lf_results = pp.loadflow.run_ac(n, lf_parameters)
+
+    # Target_P
+    if slack_gen_type != 'Generator':
+        raise NotImplementedError()
+    n.update_generators(pd.DataFrame({'target_p' : target_P}, index=[slack_gen_id]))
+
 
     if target_Q != None:
         if slack_gen_id == None or slack_gen_type == None:
             raise
 
-    while True:
-        delta_P = -lf_results[0].slack_bus_active_power_mismatch
-        if math.isnan(delta_P):
-            print('Warning: load flow did not converge')
-            break
-        if target_Q != None:
-            if slack_gen_type == 'Line':
-                delta_Q = target_Q + n.get_lines().get('q2').get(slack_gen_id)
-            elif slack_gen_type == 'Generator':
-                delta_Q = target_Q + n.get_generators().get('q').get(slack_gen_id)
+    # Restore the load/generation balance and target_Q
+    def load_generation_balance(n):
+        lf_parameters = pp.loadflow.Parameters(distributed_slack=False)
+        while True:
+            lf_results = pp.loadflow.run_ac(n, lf_parameters)
+            delta_P = -lf_results[0].slack_bus_active_power_mismatch
+            if math.isnan(delta_P):
+                print('Warning: load flow did not converge')
+                break
+            if target_Q != None:
+                if slack_gen_type == 'Line':
+                    delta_Q = target_Q + n.get_lines().get('q2').get(slack_gen_id)
+                elif slack_gen_type == 'Generator':
+                    delta_Q = target_Q + n.get_generators().get('q').get(slack_gen_id)
+                else:
+                    raise NotImplementedError()
+                if (abs(delta_Q) < 1e-6 and abs(delta_P) < 1e-6):
+                    break
+                slack = {'p0' : delta_P + n.get_loads().get('p0').get(slack_load_id), 'q0' : delta_Q + n.get_loads().get('q0').get(slack_load_id)}
             else:
-                raise NotImplementedError()
-            if (abs(delta_Q) < 1e-6 and abs(delta_P) < 1e-6):
-                break
-            slack = {'p0' : delta_P + n.get_loads().get('p0').get(slack_load_id), 'q0' : delta_Q + n.get_loads().get('q0').get(slack_load_id)}
-        else:
-            if (abs(delta_P) < 1e-6):
-                break
-            slack = {'p0' : delta_P + n.get_loads().get('p0').get(slack_load_id)}
+                if (abs(delta_P) < 1e-6):
+                    break
+                slack = {'p0' : delta_P + n.get_loads().get('p0').get(slack_load_id)}
 
-        n.update_loads(pd.DataFrame(slack, index = [slack_load_id]))
-        lf_results = pp.loadflow.run_ac(n, lf_parameters)
+            n.update_loads(pd.DataFrame(slack, index = [slack_load_id]))
+            lf_results = pp.loadflow.run_ac(n, lf_parameters)
+
+    # Tap changers
+    n_iter = 0
+    current_lowest_regulating_transformer = 400
+    while True:
+        load_generation_balance(n)
+
+        if current_lowest_regulating_transformer < 5:
+            break
+
+        buses = n.get_buses()
+        tap_changers = n.get_ratio_tap_changers()
+        tap_change = False
+        for tap_changer in tap_changers.index:
+            if tap_changers.at[tap_changer, 'target_v'] < current_lowest_regulating_transformer:
+                continue
+
+            v = buses.at[tap_changers.at[tap_changer, 'regulating_bus_id'], 'v_mag']
+            if v < tap_changers.at[tap_changer, 'target_v'] - tap_changers.at[tap_changer, 'target_deadband']:
+                if tap_changers.at[tap_changer, 'tap'] < tap_changers.at[tap_changer, 'high_tap']:
+                    tap_change = True
+                    tap = tap_changers.at[tap_changer, 'tap'] + 1
+                    n.update_ratio_tap_changers(pd.DataFrame({'tap' : tap}, index=[tap_changer]))
+            elif v > tap_changers.at[tap_changer, 'target_v'] + tap_changers.at[tap_changer, 'target_deadband']:
+                if tap_changers.at[tap_changer, 'tap'] > tap_changers.at[tap_changer, 'low_tap']:
+                    tap_change = True
+                    tap = tap_changers.at[tap_changer, 'tap'] - 1
+                    n.update_ratio_tap_changers(pd.DataFrame({'tap' : tap}, index=[tap_changer]))
+            else:
+                pass
+
+        if not tap_change:
+            if current_lowest_regulating_transformer < min(tap_changers.target_v):
+                break
+            current_lowest_regulating_transformer /= 2  # First set the tap of the HV transformers, and progressively allow lower voltage transformer to be regulating too
+
+        n_iter += 1
+        if n_iter > 100:
+            raise RuntimeError('Erratic behaviour of tap changers')
 
     output_iidm = os.path.join(output_dir, os.path.basename(input_iidm))
     if os.path.exists(output_iidm):
@@ -386,7 +435,7 @@ def writeStaticParams(static_parameters, input_iidm, output_dir, slack_load_id, 
         if ext != 'xiidm':
             os.rename(file + '.xiidm', output_iidm)
 
- 
+
 def addSuffix(s, suffix):
     """
     Add suffix at the end of filename, but before extension
@@ -404,11 +453,11 @@ def fileIsInList(file, lst):
     return False
 
 
-def writeParametricSAInputs(working_dir, fic_MULTIPLE, network_name, output_dir_name, static_parameters, dyn_data_dic, run_id, target_Q=None, slack_load_id=None, slack_gen_id=None, slack_gen_type=None, disturbance_ids=None):
+def writeParametricSAInputs(working_dir, fic_MULTIPLE, network_name, output_dir_name, static_parameters, dyn_data_dic, run_id, target_P, target_Q=None, slack_load_id=None, slack_gen_id=None, slack_gen_type=None, disturbance_ids=None):
     """
     Write the inputs files necessary to perform a "parametric" systematic analysis (SA), i.e. a systematic analysis where the parameters are modified
 
-    Hypothesis: 
+    Hypothesis:
         - All files needed to perform the SA already exist (altough the values are not randomised yet), are in working_dir,
         and are named network_name + standard extension (the "event" dyd files don't need to follow a specific naming convention)
         - All parameters are in the network_name.par file
@@ -464,7 +513,7 @@ def writeParametricSAInputs(working_dir, fic_MULTIPLE, network_name, output_dir_
         shutil.copy(os.path.join(working_dir, dyd_file), output_dir)
 
     # Write new .iidm's
-    writeStaticParams(static_parameters, full_network_name + '.iidm', output_dir, slack_load_id, target_Q, slack_gen_id, slack_gen_type)      
+    writeStaticParams(static_parameters, full_network_name + '.iidm', output_dir, slack_load_id, target_P, target_Q, slack_gen_id, slack_gen_type)
 
     # Write new .par's
     writeDynamicParams(dyn_data_dic, full_network_name + '.par', output_dir)
@@ -495,7 +544,7 @@ if __name__ == "__main__":
     csv_iidm = os.path.join(working_dir, args.csv_iidm)
     network_name = args.name
     full_network_name = os.path.join(working_dir, network_name)
-    
+
     for run_id in range(args.nb_runs):
         output_dir_name = "RandomisedInputs_%03d" % run_id
         output_dir = os.path.join(working_dir, output_dir_name)

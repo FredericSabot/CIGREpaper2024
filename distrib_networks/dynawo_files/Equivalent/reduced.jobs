@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<dyn:jobs xmlns:dyn="http://www.rte-france.com/dynawo">
+  <dyn:job name="Reduced CIGRE_MV_Wind - Voltage drop">
+    <dyn:solver lib="dynawo_SolverSIM" parFile="reduced.par" parId="3"/>
+    <dyn:modeler compileDir="outputs_reduced/compilation">
+      <dyn:network iidmFile="reduced.iidm" parFile="reduced.par" parId="Network"/>
+      <dyn:dynModels dydFile="reduced.dyd"/>
+      <dyn:precompiledModels useStandardModels="true"/>
+      <dyn:modelicaModels useStandardModels="true"/>
+    </dyn:modeler>
+    <dyn:simulation startTime="0" stopTime="5"/>
+    <dyn:outputs directory="outputs_reduced">
+      <!-- <dyn:timeline exportMode="TXT" filter="true"/> -->
+      <dyn:curves inputFile="reduced.crv" exportMode="CSV"/>
+      <!--<dyn:logs>
+        <dyn:appender tag="" file="dynawo.log" lvlFilter="DEBUG"/>
+      </dyn:logs>-->
+    </dyn:outputs>
+  </dyn:job>
+</dyn:jobs>

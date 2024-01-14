@@ -9,10 +9,20 @@ import numpy as np
 import matplotlib.pyplot as plt
 import time
 from dataclasses import dataclass
+from joblib import Parallel, delayed
+from pathlib import Path
+import pypowsybl as pp
+import pandas as pd
+import glob
+import shutil
 
 import RandomParameters
 from RandomParameters import DynamicParameter, DynamicParameterList, StaticParameter, StaticParameterList
 import MergeRandomOutputs
+from ukgds_to_iidm import build_network_and_simulate
+import ukgds_to_iidm
+
+DYNAWO_ALGO_PATH = '/home/fsabot/Desktop/dynawo-algorithms/myEnvDynawoAlgorithms.sh'
 
 def normaliseParameters(parameters, bounds):
     min_b, max_b = np.asarray(bounds).T
@@ -103,7 +113,7 @@ class DynamicParameterListWithBounds:
     def __init__(self, bounds_csv):
         self.param_list = DynamicParameterList()
         self.bounds = []
- 
+
         with open(bounds_csv) as csvfile:
             spamreader = csv.reader(csvfile, delimiter=',')
             row = spamreader.__next__()
@@ -125,11 +135,11 @@ class DynamicParameterListWithBounds:
         """
         self.param_list.append(parameter)
         self.bounds.append(bounds)
-    
+
     def valueListToParameterList(self, value_list):
         if len(value_list) != len(self.bounds):
             raise ValueError('value_list and self_bounds should have the same length')
-        
+
         parameter_list = DynamicParameterList()
         for i in range(len(value_list)):
             parameter_list.append(self.param_list[i])
@@ -169,7 +179,7 @@ class StaticParameterListWithBounds:
     def valueListToParameterList(self, value_list):
         if len(value_list) != len(self.bounds):
             raise ValueError('value_list and self_bounds should have the same length')
-        
+
         parameter_list = StaticParameterList()
         for i in range(len(value_list)):
             parameter_list.append(self.param_list[i])
@@ -177,16 +187,16 @@ class StaticParameterListWithBounds:
         return parameter_list
 
 
-def runSA(static_parameters, dyn_parameters, working_dir, output_dir_name, fic_MULTIPLE, network_name, run_id, target_Q=None, slack_load_id=None, slack_gen_id=None, slack_gen_type=None, disturbance_ids=None, nb_threads='6'):
+def runSA(static_parameters, dyn_parameters, working_dir, output_dir_name, fic_MULTIPLE, network_name, run_id, target_P, target_Q=None, slack_load_id=None, slack_gen_id=None, slack_gen_type=None, disturbance_ids=None, nb_threads='5'):
     RandomParameters.writeParametricSAInputs(working_dir, fic_MULTIPLE, network_name, output_dir_name, static_parameters, dyn_parameters,
-            run_id, target_Q, slack_load_id, slack_gen_id, slack_gen_type, disturbance_ids)
+            run_id, target_P, target_Q, slack_load_id, slack_gen_id, slack_gen_type, disturbance_ids)
 
     output_dir = os.path.join(working_dir, output_dir_name)
-    cmd = ['./myEnvDynawoAlgorithms.sh', 'SA', '--directory', output_dir, '--input', 'fic_MULTIPLE.xml',
+    cmd = [DYNAWO_ALGO_PATH, 'SA', '--directory', output_dir, '--input', 'fic_MULTIPLE.xml',
             '--output' , 'aggregatedResults.xml', '--nbThreads', nb_threads]
     output = subprocess.run(cmd, capture_output=True, text=True)
-    # if output.stderr != '':
-    #     print(output.stderr, end='')
+    if output.stderr != '':
+        print(output.stderr, end='')
 
 
 def runRandomSA(static_csv, dynamic_csv, working_dir, output_dir_name, fic_MULTIPLE, network_name, run_id, target_Q=None, slack_load_id=None, slack_gen_id=None, slack_gen_type=None):
@@ -197,7 +207,7 @@ def runRandomSA(static_csv, dynamic_csv, working_dir, output_dir_name, fic_MULTI
     runSA(static_parameters, dyn_parameters, working_dir, output_dir_name, fic_MULTIPLE, network_name, run_id, target_Q, slack_load_id, slack_gen_id, slack_gen_type)
 
 
-def runSAFromValueList(value_list, nb_dyn_params, dyn_bounds, static_bounds, working_dir, output_dir_name, fic_MULTIPLE, network_name, run_id, target_Q=None, slack_load_id=None, slack_gen_id=None, slack_gen_type=None, total_load=None, total_gen=None, disturbance_ids=None):
+def runSAFromValueList(value_list, nb_dyn_params, dyn_bounds, static_bounds, working_dir, output_dir_name, fic_MULTIPLE, network_name, run_id, target_P, target_Q=None, slack_load_id=None, slack_gen_id=None, slack_gen_type=None, total_load=None, total_gen=None, disturbance_ids=None):
     dyn_value_list, static_value_list = value_list[:nb_dyn_params], value_list[nb_dyn_params:]
     dyn_parameters = dyn_bounds.valueListToParameterList(dyn_value_list)
     static_parameters = static_bounds.valueListToParameterList(static_value_list)
@@ -205,57 +215,43 @@ def runSAFromValueList(value_list, nb_dyn_params, dyn_bounds, static_bounds, wor
     if total_load is not None and total_gen is not None:
         static_parameters = refineStaticParameters(static_parameters, total_load, total_gen)
 
-    runSA(static_parameters, dyn_parameters, working_dir, output_dir_name, fic_MULTIPLE, network_name, run_id, target_Q, slack_load_id, slack_gen_id, slack_gen_type, disturbance_ids)
+    runSA(static_parameters, dyn_parameters, working_dir, output_dir_name, fic_MULTIPLE, network_name, run_id, target_P, target_Q, slack_load_id, slack_gen_id, slack_gen_type, disturbance_ids)
 
 
-def objective(fitted_curves, random_curves, value_list, bounds, lasso_factor, parameter_names, convergence_criteria = 1, tripping_only = False):
+def objective(fitted_curves, random_curves, target_percentile, value_list, bounds, lasso_factor, parameter_names, convergence_criteria = 1):
     median = np.median(random_curves, axis=2)  # average over runs
     sigma = np.std(random_curves, axis=2, ddof=1)
-    sigma_fixed = sigma.copy()
-    for (x,y,z), value in np.ndenumerate(sigma_fixed):
-        sigma_fixed[x,y,z] = max(value, 1e-3)  # Avoid division by 0
-    percentile_5, percentile_95 = np.percentile(random_curves, axis=2, q=[5, 95])
+    percentile = np.percentile(random_curves, axis=2, q=target_percentile)
     for (x,y,z), value in np.ndenumerate(sigma):
-        sigma[x,y,z] = max(max(value, 1e-2), 1e-2 * abs(median[x,y,z]))  # Avoid division by 0 + allow some tolerance
-        sigma[x,y,z] = min(sigma[x,y,z], abs(0.1 * max(median[x,y,0], median[x,y,z])))  # Limit tolerance when very high dispersion # Issue if median close to 0 at some point
+        sigma[x,y,z] = max(max(value, 5e0), 1e-2 * abs(median[x,y,z]))  # Avoid division by 0 + allow some tolerance
+        # sigma[x,y,z] = min(sigma[x,y,z], abs(0.1 * max(median[x,y,0], median[x,y,z])))  # Limit tolerance when very high dispersion # Issue if median close to 0 at some point
 
-    obj = ((fitted_curves - percentile_95) / sigma)
+    obj = ((fitted_curves - percentile) / sigma)
     for (x,y,z), value in np.ndenumerate(obj):
-        if value > 0:
-            obj[x, y, z] = value / 2
+        if target_percentile > 50:
+            if value > 0:
+                obj[x, y, z] = value / 2
+        elif target_percentile < 50:
+            if value < 0:
+                obj[x, y, z] = value / 2
     obj = obj**2
-    obj = np.clip(obj, 0, 100)  # Allow for large errors if they only occur during a very short period.
-                                # Could also use dynamic time warping or another similar metric
+    obj = np.clip(obj, 0, 50)  # Allow for large errors if they only occur during a very short period.
 
-    obj_name_disturb = np.mean(obj, axis=2)  # 0.5 * np.percentile(obj, axis=2, q=95) + 0.5 * np.mean(obj, axis=2)  # average over time
-
-    if tripping_only:  # Only consider active power steady-state error
-        for (x,y), value in np.ndenumerate(obj_name_disturb):
-            obj_name_disturb[x,y] = 0 + abs(percentile_95[x,y,-1] - fitted_curves[x,y,-1]) / sigma[x,y,-1]  # Only look at steady-state deviation error
-            if x == 1:
-                obj_name_disturb[x,y] = 0  # Neglect reactive power
-
+    obj_name_disturb = np.mean(obj, axis=2)  # average over time
     if np.max(obj_name_disturb) <= convergence_criteria:
         converged = True
     else:
         converged = False
-
     obj = np.sum(obj_name_disturb, axis=0)  # sum over curve_names (typically P and Q at point of common coupling)
+    obj = np.mean(obj)  # average over disturbances
 
-    if tripping_only:
-        obj = np.mean(obj) + np.max(obj)
-    else:
-        obj = np.mean(obj)  # average over disturbances
-
-    if obj < 6:
-        pass
     normalised_parameters = normaliseParameters(value_list, bounds)
     parameter_dist = [abs(i - 0.5) for i in normalised_parameters]
     total_obj = obj + lasso_factor * sum([0 if isTrippingParameter(parameter_names[i]) else parameter_dist[i] for i in range(len(parameter_dist))])
 
     return Objective(total_obj, obj_name_disturb, parameter_dist, converged)
 
-def plotCurves(curves, plot_name, fitted_curves = None, time_precision=1e-2):  # ndarray(curve_name, scenario, run, t_step)
+def plotCurves(curves, plot_name, fitted_curves = None, target_percentile=None, time_precision=1e-2):  # ndarray(curve_name, scenario, run, t_step)
     nb_disturb = curves.shape[1]
     nb_runs = curves.shape[2]
     nb_time_steps = curves.shape[3]
@@ -268,30 +264,26 @@ def plotCurves(curves, plot_name, fitted_curves = None, time_precision=1e-2):  #
     sigma = np.std(curves, axis=2, ddof=1)  # ddof = 1 means divide by sqrt(N-1) instead of sqrt(N)
     percentile_5, percentile_95 = np.percentile(curves, axis=2, q=[5, 95])
     for (x,y,z), value in np.ndenumerate(sigma):
-        sigma[x,y,z] = max(max(value, 1e-2), 1e-2 * abs(median[x,y,z]))  # Avoid division by 0 + allow some tolerance
-        sigma[x,y,z] = min(sigma[x,y,z], abs(0.1 * median[x,y,0]))  # Limit tolerance when very high dispersion # Issue if median close to 0 at some point
+        sigma[x,y,z] = max(max(value, 2e0), 1e-2 * abs(median[x,y,z]))  # Avoid division by 0 + allow some tolerance
 
-    if fitted_curves is not None:
-        obj = ((fitted_curves - percentile_95) / sigma)
+    if fitted_curves is not None and target_percentile is not None:
+        percentile = np.percentile(curves, axis=2, q=target_percentile)
+        obj = ((fitted_curves - percentile) / sigma)
         for (x,y,z), value in np.ndenumerate(obj):
             if value < 0:
                 obj[x, y, z] = value / 2
         obj = obj**2
-        obj = np.clip(obj, 0, 100)  # Allow for large errors if they only occur during a very short period
+        obj = np.clip(obj, 0, 50)  # Allow for large errors if they only occur during a very short period
     else:
         obj = None
 
-    representative_index = 0
-    representative_dist = 999999
-    nb_runs = curves.shape[2]
-    for i in range(nb_runs):
-        dist = np.sum(np.mean(np.mean(((curves[:,:,i,:] - percentile_95) / sigma)**2, axis=2), axis=1))
-        if dist < representative_dist:
-            representative_dist = dist
-            representative_index = i
-
     for c in range(curves.shape[0]):
         fig, axs = plt.subplots(sqrt_d, sqrt_d)
+
+        surplus_axes = int((sqrt_d*sqrt_d-curves.shape[1]))
+        for i in range(surplus_axes):
+            fig.delaxes(axs[-1,-(1+i)])
+
         for d in range(curves.shape[1]):
             axs2 = axs[d//sqrt_d, d%sqrt_d].twinx()
             axs[d//sqrt_d, d%sqrt_d].set_title('Disturbance %d' % (d + 1))
@@ -307,7 +299,6 @@ def plotCurves(curves, plot_name, fitted_curves = None, time_precision=1e-2):  #
 
             if obj is not None:
                 axs2.plot(t_axis, obj[c,d,:], label='Error', zorder=1000, alpha=0.3)
-            # axs[d//sqrt_d, d%sqrt_d].plot(t_axis, curves[c,d,representative_index,:], label='Representative', zorder=2000)
 
             if fitted_curves is not None:
                 axs[d//sqrt_d, d%sqrt_d].plot(t_axis, fitted_curves[c,d,:], 'red', label='Fit', zorder=3000)
@@ -325,24 +316,27 @@ def getParameterNames(dyn_bounds, static_bounds):
         parameter_names.append(parameter.component_name + '_' + parameter.id)
     return parameter_names
 
-def printParameters(de_results : DEResults, dyn_bounds, static_bounds, working_dir = None, output_file = None, output_file_human_readable = None):
+def printParameters(de_results : DEResults, dyn_bounds, static_bounds, output_file = None, additional_parameters = None):
     parameter_names = getParameterNames(dyn_bounds, static_bounds)
 
     parameter_values = de_results.best_parameters
     for i in range(len(parameter_values)):
         print(parameter_names[i], parameter_values[i])
+    if additional_parameters is not None:
+        for additional_parameter in additional_parameters:
+            print(additional_parameter[0], additional_parameter[1])
 
-    if working_dir is not None and output_file_human_readable is not None:
-        with open(os.path.join(working_dir, output_file_human_readable), 'w') as file:
+    if output_file is not None:
+        with open(output_file, 'w') as file:
             parameter_values = de_results.best_parameters
             for i in range(len(parameter_values)):
                 file.write(parameter_names[i] + ' ' + str(parameter_values[i]))
                 file.write('\n')
+            if additional_parameters is not None:
+                for additional_parameter in additional_parameters:
+                    file.write(additional_parameter[0] + ' ' + str(additional_parameter[1]))
+                    file.write('\n')
 
-    if working_dir is not None and output_file is not None:
-        with open(os.path.join(working_dir, output_file), 'w') as file:
-            file.write(repr(de_results))
-            file.write('\n')
 
 def isTrippingParameter(parameter_name):
     if 'LVRT' in parameter_name:
@@ -351,73 +345,27 @@ def isTrippingParameter(parameter_name):
         return False
 
 
-if __name__ == "__main__":
+def build_dynamic_equivalent(load_ratio, der_capacity_factor, der_installed_share, der_legacy_share, target_percentile):
     random.seed(1)
     start_time = time.time()
-    parser = argparse.ArgumentParser('Takes as input the same files as a systematic analysis (SA), and generates a randomised version of those files. '
-    'Those can then be used to perform another SA. The ouput files are all written to working_dir/RandomisedInputs/')
 
-    parser.add_argument('--working_dir', type=str, required=True,
-                        help='Working directory')
-    parser.add_argument('--fic_MULTIPLE', type=str, required=True,
-                        help='Input file containing the different scenarios to run')
-    parser.add_argument('--reduced_fic_MULTIPLE', type=str, required=True,
-                        help='Input file containing the different scenarios to run for the reduced model')
-    parser.add_argument('--name', type=str, required=True,
-                        help='Name of the network')
-    parser.add_argument('--reduced_name', type=str, required=True,
-                        help='Name of the reduced network')
-    parser.add_argument('--nb_threads', type=str, required=True,
-                        help="Number of threads (to use in the SA's)")
-    # Random runs
-    parser.add_argument('--csv_par', type=str, required=True,
-                        help='Csv file containing the list of dynamic parameters to be randomised and associated distributions')
-    parser.add_argument('--csv_iidm', type=str, required=True,
-                        help='Csv file containing the list of static parameters to be randomised and associated distributions')
-    parser.add_argument('--nb_runs_random', type=int, required=True,
-                        help='Maximum number of random SA\'s to run')
-    parser.add_argument('--curve_names', '-c', type=str, required=True, action='append',
-                        help='List of the names of the curves that have to be merged')
-    parser.add_argument('--time_precision', type=float, required=True,
-                        help='Time precision of the output curves (linear interpolation from the input ones)')
-    # Parameter optimisation
-    parser.add_argument('--csv_par_bounds', type=str, required=True,
-                        help='Csv file containing the list of dynamic parameters to be optimised and their bounds')
-    parser.add_argument('--csv_iidm_bounds', type=str, required=True,
-                        help='Csv file containing the list of static parameters to be optimised and their bounds')
-    # Balancing (assume same names for full and reduced model)
-    parser.add_argument('--target_Q', type=str, required=True,
-                        help='Reactive power that should be produced by the infinite bus')
-    parser.add_argument('--slack_load_id', type=str, required=True,
-                        help='Id of the slack bus that balances the reactive power (should be connected to the slack bus). '
-                        'In future versions of pypowsybl, it will be possible to add new elements (then remove them I suppose) '
-                        '-> The slack load and generators won\'t be needed anymore.')
-    parser.add_argument('--slack_gen_id', type=str, required=True,
-                        help='Id of the generator that emulates the infinite bus in powsybl')
-    args = parser.parse_args()
+    parameter_string = '_'.join([str(i) for i in [load_ratio, der_capacity_factor, der_installed_share, der_legacy_share]])
 
-    working_dir = args.working_dir
-    fic_MULTIPLE = os.path.join(working_dir, args.fic_MULTIPLE)
-    reduced_fic_MULTIPLE = os.path.join(working_dir, args.reduced_fic_MULTIPLE)
-    network_name = args.name
-    reduced_network_name = args.reduced_name
-    csv_par = os.path.join(working_dir, args.csv_par)
-    csv_iidm = os.path.join(working_dir, args.csv_iidm)
-    csv_par_bounds = os.path.join(working_dir, args.csv_par_bounds)
-    csv_iidm_bounds = os.path.join(working_dir, args.csv_iidm_bounds)
-    target_Q = float(args.target_Q)
-    nb_runs_random = args.nb_runs_random
-    slack_load_id = args.slack_load_id
-    slack_gen_id = args.slack_gen_id
-    slack_gen_type = "Line"
-    nb_threads = args.nb_threads
-    curve_names = args.curve_names
-    time_precision = args.time_precision
-
-    MIN_NB_RUNS = 10
+    working_dir = 'dynawo_files/Equivalent/'
+    reduced_fic_MULTIPLE = os.path.join(working_dir, 'reduced_fic.xml')
+    reduced_network_name = 'reduced'
+    csv_par_bounds = os.path.join(working_dir, 'params_dyd_bounds.csv')
+    csv_iidm_bounds = os.path.join(working_dir, 'params_iidm_bounds.csv')
+    target_Q = 0
+    nb_runs_random = 3  # Only consider sensitivity case on motor share
+    slack_load_id = 'LOAD-slack'
+    slack_gen_id = 'GEN-slack'
+    slack_gen_type = "Generator"
+    curve_names = ['GEN-slack_generator_PGen', 'GEN-slack_generator_QGen']
+    time_precision = 0.01
 
     rerun_random = False
-    rerun_de = False
+    rerun_de = True
 
     if rerun_random:  # If intermediary results changes, need to rerun following steps
         rerun_de = True
@@ -426,54 +374,73 @@ if __name__ == "__main__":
     # Part 1: random runs
     ###
 
-    run_fic_MULTIPLE = []
-    sigma_thr = 0.01
+    Path('RandomCurves').mkdir(parents=True, exist_ok=True)
+    random_curves_save = os.path.join('RandomCurves', parameter_string + '.npy')
 
-    for run_id in range(max(nb_runs_random, MIN_NB_RUNS)):
-        output_dir_name = os.path.join('RandomRuns', 'It_%03d' % run_id)
-        if rerun_random:
-            runRandomSA(csv_iidm, csv_par, working_dir, output_dir_name, fic_MULTIPLE, network_name, run_id, target_Q, slack_load_id, slack_gen_id, slack_gen_type)
+    seeds = range(nb_runs_random)
+    # seeds = [None]
+    network_names = ['ehv{}'.format(i) for i in range(1, 7) if i != 4]
 
-        current_fic = os.path.join(working_dir, output_dir_name, 'fic_MULTIPLE.xml')
-        run_fic_MULTIPLE.append(current_fic)
-
-        new_curves = -100 * MergeRandomOutputs.mergeCurvesFromFics([current_fic], curve_names, time_precision)  # Minus because infinite bus has receptor convention (minus sign only affects the curves), 100 is from pu to MW
-        if run_id == 0:
-            random_curves = new_curves
+    if Path(random_curves_save).exists() and not rerun_random:
+        random_curves = np.load(random_curves_save)
+    else:
+        PARALLEL = False
+        if PARALLEL:
+            results = Parallel(n_jobs=5)(delayed(build_network_and_simulate)(network_name, load_ratio, der_installed_share, der_capacity_factor, der_legacy_share, seed, True) for network_name in network_names for seed in seeds)
         else:
-            random_curves = np.concatenate((random_curves, new_curves), axis=2)  # ndarray(curve_name, scenario, run, t_step)
-        if np.any(np.abs(new_curves[:,:,0, 0] - new_curves[:,:,0, 50]) > 0.1):
-            print(run_id)
-            print('Initialisation does not lead to steady-state')
+            results = []
+            for network_name in network_names:
+                for seed in seeds:
+                    results.append(build_network_and_simulate(network_name, load_ratio, der_installed_share, der_capacity_factor, der_legacy_share, seed, True))
 
-        if run_id > MIN_NB_RUNS:
-            median = np.median(random_curves, axis=2)  # average over runs
-            sigma = np.std(random_curves, axis=2, ddof=1)  # ddof = 1 means divide by sqrt(N-1) instead of sqrt(N)
+        output_curve_paths = []
+        network_names = []
+        run_fic_MULTIPLE = []
+        for result in results:
+            output_curve_paths.append(result[0])
+            network_names.append(result[1])
+            run_fic_MULTIPLE.append(result[2])  # Different networks are interpreted as independent random runs for the purpose of equivalencing
 
-            for (x,y,z), value in np.ndenumerate(sigma):
-                sigma[x,y,z] = max(value, 1e-3)  # Avoid division by 0
+        random_curves = MergeRandomOutputs.mergeCurvesFromFics(run_fic_MULTIPLE, curve_names, time_precision)
+        np.save(random_curves_save, random_curves)
 
-            std_error = sigma / abs(median[:,:,[0 for i in range(sigma.shape[2])]]) / sqrt(run_id + 1)  # Normalise with respect to value at t = 0
-            print('Run_id: %d, Std error: %f' % (run_id, std_error.max()*100), end='\n')
-            if std_error.max() < sigma_thr:
-                print("\nThreshold reached in %d iterations" % (run_id + 1))
-                break
-
-    if std_error.max() > sigma_thr:
-        print("Warning: maximum number of random runs ({}) reached with sigma ({}%) > tol ({}%)".format(nb_runs_random, std_error.max()*100, sigma_thr*100))
-
-    # Merge all curves and write to csv (only done once at the end for performance)
-    output_dir_curves = os.path.join(working_dir, "MergedCurves")
-    # MergeRandomOutputs.mergeCurvesFromFics(run_fic_MULTIPLE, curve_names, time_precision, write_to_csv=True, output_dir=output_dir_curves)
+    # Print some statistics
+    sigma = np.std(random_curves, axis=2, ddof=1)  # ddof = 1 means divide by sqrt(N-1) instead of sqrt(N)
+    for (x,y,z), value in np.ndenumerate(sigma):
+        sigma[x,y,z] = max(value, 1e-3)  # Avoid division by 0
+    std_error = sigma / len(seeds) / len(network_names)
+    print('Nb random runs: %d, Std error: %f' % (nb_runs_random * len(network_names), std_error.max()))
 
     randomising_time = time.time()
 
-    plotCurves(random_curves, 'Random')
+    Path('Random_Curves').mkdir(parents=True, exist_ok=True)
+    plotCurves(random_curves, os.path.join('Random_Curves', 'Random_' + parameter_string))
     print('Spent %.1fs on randomising the full model' % (randomising_time-start_time))
 
     ###
     # Part 2: optimisation
     ###
+
+    der_legacy_share = max(der_legacy_share, 1e-3)  # At least some amount of legacy and non-legacy for numerical reasons
+    der_legacy_share = min(der_legacy_share, 1-1e-3)
+
+    equivalent = pp.network.load(os.path.join(working_dir, 'reduced.iidm'))
+    """ current_equivalent_path = os.path.join(working_dir, 'current_equivalent')
+    equivalent_files = glob.glob(os.path.join(working_dir, '*'))
+    working_dir = os.path.join(working_dir, 'current_equivalent')
+    for file in equivalent_files:
+        shutil.copy(file, working_dir) """
+    equivalent.update_loads(pd.DataFrame({'p0' : 100 * load_ratio}, index = ['LOAD']))
+    equivalent.update_generators(pd.DataFrame({'max_p' : 100 * der_installed_share * der_legacy_share}, index = ['IBG-legacy']))
+    equivalent.update_generators(pd.DataFrame({'target_p' : 100 * der_installed_share * der_capacity_factor * der_legacy_share}, index = ['IBG-legacy']))
+    equivalent.update_generators(pd.DataFrame({'max_p' : 100 * der_installed_share * (1-der_legacy_share)}, index = ['IBG-G99']))
+    equivalent.update_generators(pd.DataFrame({'target_p' : 100 * der_installed_share * der_capacity_factor * (1-der_legacy_share)}, index = ['IBG-G99']))
+    ukgds_to_iidm.dump_network_file(equivalent, os.path.join(working_dir, 'reduced'))
+
+    parameter_string += '_' + str(target_percentile)
+
+    percentile = np.percentile(random_curves, axis=2, q=target_percentile)
+    target_P = percentile[0, 0, 0]
 
     np.random.seed(int(42))
 
@@ -487,48 +454,42 @@ if __name__ == "__main__":
     bounds = dyn_bounds_list + static_bounds_list
     parameter_names = getParameterNames(dyn_bounds, static_bounds)
 
-    def fobj2(value_list, lasso_factor, output_dir, disturbance_ids = None, convergence_criteria = 1.0, rerun = True, tripping_only = False):
+    def fobj2(value_list, lasso_factor, output_dir, disturbance_ids = None, convergence_criteria = 1.0, rerun = True):
         global run_id
         output_dir_name = os.path.join(output_dir, "It_%03d" % run_id)
-        if rerun:
-            runSAFromValueList(value_list, nb_dyn_params, dyn_bounds, static_bounds, working_dir, output_dir_name, reduced_fic_MULTIPLE, reduced_network_name, run_id, target_Q, slack_load_id, slack_gen_id, slack_gen_type, disturbance_ids=disturbance_ids)
         current_fic = os.path.join(working_dir, output_dir_name, 'fic_MULTIPLE.xml')
-        curves = -100 * MergeRandomOutputs.mergeCurvesFromFics([current_fic], curve_names, time_precision)  # Minus because infinite bus has receptor convention (minus sign only affects the curves), 100 is from pu to MW
+        if rerun:
+            runSAFromValueList(value_list, nb_dyn_params, dyn_bounds, static_bounds, working_dir, output_dir_name, reduced_fic_MULTIPLE, reduced_network_name, run_id, target_P, target_Q, slack_load_id, slack_gen_id, slack_gen_type, disturbance_ids=disturbance_ids)
+        curves = MergeRandomOutputs.mergeCurvesFromFics([current_fic], curve_names, time_precision)  # Minus because infinite bus has receptor convention (minus sign only affects the curves), 100 is from pu to MW
         curves = curves[:,:,0,:]  # Only a single run, so replace (curve_name, scenario, run, t_step) -> (curve_name, scenario, t_step)
         if disturbance_ids is not None:
             random_curves_considered = random_curves[:,disturbance_ids,:]
         else:
             random_curves_considered = random_curves
-        obj = objective(curves, random_curves_considered, value_list, bounds, lasso_factor, parameter_names, convergence_criteria, tripping_only)
+        obj = objective(curves, random_curves_considered, target_percentile, value_list, bounds, lasso_factor, parameter_names, convergence_criteria)
         print('Run id: %d, objective: %f' %(run_id, obj.total_obj))
         run_id += 1
         return obj
 
     # DE parameters
-    pop_size = 20
+    pop_size = 10
     nb_max_iterations_DE = 20
 
-    """ # Identify disturbances that do not lead to tripping
-    percentile_5, percentile_95 = np.percentile(random_curves, axis=2, q=[5, 95])
-    nb_disturb = random_curves.shape[1]
-    nb_time_steps = random_curves.shape[2]
-    no_trip_cases = []
-    for d in range(nb_disturb):
-        if abs(percentile_5[0, d, 0] - percentile_5[0, d, -1]) < 1e-2 and abs(percentile_95[0, d, 0] - percentile_95[0, d, -1]) < 1e-2:
-            no_trip_cases.append(d)
-    print(no_trip_cases) """
-
-    # DE trip
+    # DE
     convergence_criteria = 1 # max(1, np.max(results[-1].best_obj.obj_name_disturb))
-    nb_max_iterations_DE = 20
-    print('\nDE trip')
+    print('\nDE')
     def fobj(value_list):
-        return fobj2(value_list, 0, 'Optimisation_trip', rerun=rerun_de, convergence_criteria=convergence_criteria)
+        return fobj2(value_list, 0, 'Optimisation', rerun=rerun_de, convergence_criteria=convergence_criteria)
     results = list(de(fobj, bounds, popsize=pop_size, its=nb_max_iterations_DE))
     print('DE', ": objective: %f, converged: %d" % (results[-1].best_obj.total_obj, results[-1].converged))
 
     # Results
-    printParameters(results[-1], dyn_bounds, static_bounds, working_dir, 'results.txt', 'Optimised parameters.txt')
+    best_run_id = results[-1].best_index + pop_size * (results[-1].best_iteration + 1)
+    network = pp.network.load(os.path.join(working_dir, 'Optimisation', "It_%03d" % best_run_id, reduced_network_name + '.iidm'))
+    tap = network.get_ratio_tap_changers().tap.values[0]
+
+    Path('Optimised_Parameters').mkdir(parents=True, exist_ok=True)
+    printParameters(results[-1], dyn_bounds, static_bounds, os.path.join('Optimised_Parameters', 'Optimised_parameters_' + parameter_string + '.txt'), additional_parameters = [('tap', tap)])
     best_parameters = results[-1].best_parameters
     with open(os.path.join(working_dir, 'Best_parameters.csv'), 'w') as file:
         file.write(','.join([str(param) for param in best_parameters]))
@@ -543,31 +504,149 @@ if __name__ == "__main__":
     print('Spent %.1fs on randomising the full model' % (randomising_time-start_time))
     print('Spent %.1fs on optimising the reduced model' % (optimising_time-randomising_time))
 
-    best_run_id = results[-1].best_index + pop_size * (results[-1].best_iteration + 1)
-    fitted_curves = -100 * MergeRandomOutputs.mergeCurvesFromFics([os.path.join(working_dir, 'Optimisation_trip', "It_%03d" % best_run_id, 'fic_MULTIPLE.xml')], curve_names, time_precision)
-    # fitted_curves = -100 * MergeRandomOutputs.mergeCurvesFromFics([os.path.join(working_dir, 'OptimisationCheck' + '_' + '_'.join(str(id) for id in worst_disturbances), "It_%03d" % 0, 'fic_MULTIPLE.xml')], curve_names, time_precision)
+
+    fitted_curves = MergeRandomOutputs.mergeCurvesFromFics([os.path.join(working_dir, 'Optimisation', "It_%03d" % best_run_id, 'fic_MULTIPLE.xml')], curve_names, time_precision)
     fitted_curves = fitted_curves[:,:,0,:]  # Only a single run, so replace (curve_name, scenario, run, t_step) -> (curve_name, scenario, t_step)
 
-    # random_curves = random_curves[:,no_trip_cases,:,:]
-    plotCurves(random_curves, 'Fit', fitted_curves)
-
-    # Find sample most representative of full model for comparison with equivalent
-    median = np.median(random_curves, axis=2)  # average over runs
-    sigma = np.std(random_curves, axis=2, ddof=1)
-    for (x,y,z), value in np.ndenumerate(sigma):
-        sigma[x,y,z] = max(value, 1e-3)  # Avoid division by 0
-    percentile_5, percentile_95 = np.percentile(random_curves, axis=2, q=[5, 95])
-
-    representative_index = 0
-    representative_dist = 999999
-    nb_runs = random_curves.shape[2]
-    for i in range(nb_runs):
-        dist = np.sum(np.mean(np.mean(((random_curves[:,:,i,:] - percentile_95) / sigma)**2, axis=2), axis=1))
-        if dist < representative_dist:
-            representative_dist = dist
-            representative_index = i
-    print('\nRepresentative index:', representative_index)
-    print('Distance:', representative_dist)
+    Path('Fitted_Curves').mkdir(parents=True, exist_ok=True)
+    plotCurves(random_curves, os.path.join('Fitted_Curves', 'Fit_' + parameter_string), fitted_curves, target_percentile)
 
     print('\nDE best run id:', best_run_id)
     print("Objective: %f, converged: %d" % (results[-1].best_obj.total_obj, results[-1].converged))
+
+    return results[-1]
+
+
+if __name__ == '__main__':
+    NGET_loads = ['HARK', 'STEW', 'HAWP', 'NORT']
+    SPT_loads = ['LOAN', 'WYHI', 'HUNE', 'STHA', 'COCK']
+    SSEN_loads = ['TUMM', 'TEAL', 'KINT', 'PEHE', 'BEAU', 'BLHI']
+
+    for scenario in range(5):
+        if scenario == 0:
+            year = 2021
+            SCENARIO_NAME = 'Winter_{}_leading'.format(year)
+            SCOTLAND_WIND_AVAILABILITY = 0.9  # Leads to 2.64GW through B6 (limit = 3.880)
+            NGET_WIND_AVAILABILITY = 0.8
+        elif scenario == 1:
+            year = 2030
+            SCENARIO_NAME = 'Winter_{}_leading'.format(year)
+            SCOTLAND_WIND_AVAILABILITY = 0.9  # Leads to 3.35GW through B4 (limit 5.2GW), 2.5GW through B6 (limit 4GW) + 9.8GW through HVDCs
+            NGET_WIND_AVAILABILITY = 0.8
+        elif scenario == 2:
+            year = 2021
+            SCENARIO_NAME = 'SummerPM_{}_leading'.format(year)
+            SCOTLAND_WIND_AVAILABILITY = 0.7  # Leads to 3.05GW through B4 (limit 3.3), 3.1 through G6 (limit 3.8) + 1.6GW HVDC, not dynamically stable, stable with lower B4 flow
+            NGET_WIND_AVAILABILITY = 0.7
+        elif scenario == 3:
+            year = 2030
+            SCENARIO_NAME = 'SummerPM_{}_leading'.format(year)
+            SCOTLAND_WIND_AVAILABILITY = 0.7 # Leads to 2.2GW through B4 (limit 5.2), 3.0 through B4 (limit 4GW) + 9GW through HVDCs
+            NGET_WIND_AVAILABILITY = 0.3
+        elif scenario == 4:
+            year = 2030
+            SCENARIO_NAME = 'SummerAM_{}_leading'.format(year)
+            SCOTLAND_WIND_AVAILABILITY = 0.1
+            NGET_WIND_AVAILABILITY = 0.1
+
+        if 'Winter' in SCENARIO_NAME:
+            CHP_FACTOR = 0.7
+            SOLAR_FACTOR = 0  # Winter evening
+        elif 'SummerPM' in SCENARIO_NAME:
+            CHP_FACTOR = 0.2
+            SOLAR_FACTOR = 0.68  # All-time peak according to https://www.solar.sheffield.ac.uk/pvlive/ (checked on 14/12/2023, peak reached on 2023-04-20 12:30PM which is not really in the summer)
+        elif 'SummerAM' in SCENARIO_NAME:
+            CHP_FACTOR = 0.2
+            SOLAR_FACTOR = 0.1
+
+        SOLAR_CAPACITY_CORRECTION = 0.8  # The inverter of PV is often under-dimnensioned as PV rarely output 100% of their capacity
+        # So, reduce the installed capacity of PV compared to FES data and increase the capacity factor to compensate (same total
+        # output, but lower capacity)
+        if SOLAR_FACTOR > SOLAR_CAPACITY_CORRECTION:
+            raise ValueError()
+        SOLAR_FACTOR = SOLAR_FACTOR / SOLAR_CAPACITY_CORRECTION
+
+        peak_loads = {}
+        with open(os.path.join('..', 'FES data', 'aggregated', 'Winter_{}_leading'.format(year) + '.csv')) as csv_file:
+            reader = csv.reader(csv_file)
+            next(reader)  # Skip header
+            for row in reader:
+                load_name = row[0]
+                P_gross = float(row[1])
+                peak_loads[load_name] = P_gross
+        with open(os.path.join('..', 'FES data', 'aggregated', 'SummerPM_{}_leading'.format(year) + '.csv')) as csv_file:
+            reader = csv.reader(csv_file)
+            next(reader)  # Skip header
+            for row in reader:
+                load_name = row[0]
+                P_gross = float(row[1])
+                peak_loads[load_name] = max(P_gross, peak_loads[load_name])
+
+        with open(os.path.join('..', 'FES data', 'aggregated', SCENARIO_NAME + '.csv')) as csv_file:
+            reader = csv.reader(csv_file)
+            next(reader)  # Skip header
+            for row in reader:
+                load_name = row[0]
+                P_gross = float(row[1])
+                Q_net = float(row[2])
+                # storage = 0  # Included in gross load
+                solar = float(row[4]) * SOLAR_CAPACITY_CORRECTION
+                wind = float(row[5])
+                # hydro = 0  # Neglected
+                other = float(row[7])
+
+                if load_name == 'NGET':
+                    continue
+                elif load_name in NGET_loads:
+                    wind_factor = NGET_WIND_AVAILABILITY
+                else:
+                    wind_factor = SCOTLAND_WIND_AVAILABILITY
+
+                P_gross = P_gross - other * CHP_FACTOR
+
+                load_ratio = P_gross / peak_loads[load_name]
+                der_installed_share = (solar + wind) / peak_loads[load_name]
+                der_capacity_factor = (solar * SOLAR_FACTOR + wind * wind_factor) / (solar + wind)
+
+                if load_name in NGET_loads:
+                    wind_non_grid_code_share = 1 - 0.29
+                elif load_name in SPT_loads:
+                    wind_non_grid_code_share = 1 - 0.43
+                elif load_name in SSEN_loads:
+                    wind_non_grid_code_share = 1 - 0.73
+                else:
+                    raise NotImplementedError(load_name)
+
+                for case in ['default', 'G99_extended']:
+                    if year == 2021:
+                        der_legacy_share = (solar + wind * wind_non_grid_code_share) / (solar + wind)
+                    elif year == 2030:
+                        if case == 'default':  # Legacy counts both plants installed before Apr 2019 and plants with a capacity < 16A per phase
+                            der_legacy_share = (solar * (0.23 + 0.41) + wind * 0.83 * wind_non_grid_code_share) / (solar + wind)
+                        elif case == 'G99_extended':  # G99 also applied to new PV plants even if capa < 16A
+                            der_legacy_share = (solar * 0.23 + wind * 0.83 * wind_non_grid_code_share) / (solar + wind)
+
+                    if case == 'G99_extended':
+                        continue  # First decide if want to include old wind plants in G99 (compare capa with PV)
+                        # Or extend G99 to old units that are >1MW
+
+                    load_ratio = round(load_ratio, 2)
+                    der_capacity_factor = round(der_capacity_factor, 2)
+                    der_installed_share = round(der_installed_share, 2)
+                    der_legacy_share = round(der_legacy_share, 2)
+
+                    for target_percentile in [5, 95]:
+                        parameter_string = '_'.join([str(i) for i in [load_ratio, der_capacity_factor, der_installed_share, der_legacy_share, target_percentile]])
+                        print('Launching case: load_name', load_name, 'scenario', SCENARIO_NAME, 'load ratio', load_ratio, 'capacity factor', der_capacity_factor,
+                                'installed share', der_installed_share, 'legacy', der_legacy_share, 'percentile', target_percentile)
+                        if not Path(os.path.join('Optimised_Parameters', 'Optimised_parameters_' + parameter_string + '.txt')).exists():
+                            results = build_dynamic_equivalent(load_ratio, der_capacity_factor, der_installed_share, der_legacy_share, target_percentile)
+                            obj = results.best_obj.total_obj
+                            if obj > 2:
+                                raise RuntimeError('Non convergence for case', load_ratio, der_capacity_factor, der_installed_share, der_legacy_share, target_percentile,
+                                                    '\nInvestigate and delete Optimised_parameters for this case')
+                            print('Completed case: load_name', load_name, 'scenario', SCENARIO_NAME, 'load ratio', load_ratio, 'capacity factor', der_capacity_factor,
+                                'installed share', der_installed_share, 'legacy', der_legacy_share, 'percentile', target_percentile,
+                                ', objective:', obj)
+                        else:
+                            print('Case already done')

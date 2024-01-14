@@ -62,10 +62,6 @@ def plot_power(curve_paths, network_names, fig_name):
 """
 
 def plot_power(curve_paths, network_names, fig_name):
-
-    # ndarray(curve_name, scenario, run, t_step)
-
-
     nb_plots = nb_faults = len(curve_paths[0])
     ncols = ceil(nb_plots**0.5)
     nrows = ceil(nb_plots / ncols)
@@ -113,6 +109,68 @@ def plot_power(curve_paths, network_names, fig_name):
     plt.close()
 
 
+def plot_voltages(curve_paths, network_names, fig_name):
+    nb_plots = nb_faults = len(curve_paths[0])
+    ncols = ceil(nb_plots**0.5)
+    nrows = ceil(nb_plots / ncols)
+    fig, axes = plt.subplots(ncols=ncols, nrows=nrows, figsize=(12,8))
+    surplus_axes = int((ncols*nrows-nb_plots))
+    for i in range(surplus_axes):
+        fig.delaxes(axes[-1,-(1+i)])
+
+    for curve_path_, network_name in zip(curve_paths, network_names):
+        for i, curve_path in enumerate(curve_path_):
+            t = []
+            P = []
+            Q = []
+            with open(curve_path) as csvfile:
+                reader = csv.reader(csvfile, delimiter=';')
+                reader.__next__()  # Skip header
+            V_max = []
+            V_min = []
+            all_V = []
+            GSP_V = []
+            with open(curve_path) as csvfile:
+                reader = csv.reader(csvfile, delimiter=';')
+                header = reader.__next__()
+
+                voltage_columns = []
+                for j in range(len(header)):
+                    if header[j][-9:] == 'Upu_value' and header[j][:12] == 'NETWORK_B-11':
+                        voltage_columns.append(j)
+                    if header[j] == 'NETWORK_B-99_Upu_value' or header[j] == 'NETWORK_B-100_Upu_value':
+                        GSP_index = j
+
+                for row in reader:
+                    t.append(float(row[0]))
+                    V = [float(row[j]) for j in voltage_columns]
+                    V_max.append(max(V))
+                    V_min.append(min(V))
+                    all_V.append(V)
+                    GSP_V.append(float(row[GSP_index]))
+
+                color = select_plot_color(network_name)
+                axes[divmod(i, ncols)].set_ylim(bottom=0.0, top=1.15)
+                axes[divmod(i, ncols)].plot(t, V_min, color=color, label='Min 11kV voltage', linestyle='dotted')
+                axes[divmod(i, ncols)].plot(t, V_max, color=color, label='Max 11kV voltage', linestyle='dotted')
+                axes[divmod(i, ncols)].plot(t, GSP_V, color=color, label='GSP voltage', alpha=1, linestyle='dashed')
+                axes[divmod(i, ncols)].set_title(network_name)
+                # Remove duplicate legend entries (https://stackoverflow.com/a/13589144)
+                handles, labels = plt.gca().get_legend_handles_labels()
+                by_label = dict(zip(labels, handles))
+                fig.legend(by_label.values(), by_label.keys(), 'lower right')
+
+            if t[-1] < 4.5:
+                raise RuntimeError('Dynawo failed the simulation', network_name)
+
+    fig.tight_layout()
+    plt.setp(axes[-1, :], xlabel='Time [s]')
+    plt.setp(axes[:, 0], ylabel='Voltage [pu]')
+    plt.savefig(fig_name)
+    plt.close()
+
+
+"""
 def plot_voltages(curve_paths, network_names, fig_name):
     unique_network_names = sorted(list(set(network_names)))
     nb_plots = len(unique_network_names)
@@ -169,3 +227,4 @@ def plot_voltages(curve_paths, network_names, fig_name):
     plt.setp(axes[:, 0], ylabel='Voltage [pu]')
     plt.savefig(fig_name)
     plt.close()
+ """

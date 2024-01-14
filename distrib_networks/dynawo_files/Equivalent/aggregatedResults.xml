@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+<aggregatedResults xmlns="http://www.rte-france.com/dynawo" status="DIVERGENCE">
+  <scenarioResults id="VDrop1" status="CONVERGENCE"/>
+  <scenarioResults id="VDrop2" status="DIVERGENCE"/>
+  <scenarioResults id="VDrop3" status="CONVERGENCE"/>
+  <scenarioResults id="VDrop4" status="DIVERGENCE"/>
+  <scenarioResults id="VDrop5" status="CONVERGENCE"/>
+  <scenarioResults id="VDrop6" status="DIVERGENCE"/>
+  <scenarioResults id="VDrop7" status="CONVERGENCE"/>
+  <scenarioResults id="VDrop8" status="CONVERGENCE"/>
+  <scenarioResults id="VDrop9" status="CONVERGENCE"/>
+  <scenarioResults id="VDrop10" status="CONVERGENCE"/>
+  <scenarioResults id="VDrop11" status="CONVERGENCE"/>
+  <scenarioResults id="VDrop12" status="CONVERGENCE"/>
+  <scenarioResults id="VDrop13" status="CONVERGENCE"/>
+  <scenarioResults id="VDrop14" status="DIVERGENCE"/>
+</aggregatedResults>

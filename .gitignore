@@ -13,3 +13,5 @@ SCOPF/results.csv
 distrib_networks/dynawo_files/*.*
 distrib_networks/dynawo_files/Deterministic/**
 distrib_networks/dynawo_files/Random/**
+distrib_networks/dynawo_files/Equivalent/Optimisation*/**
+*.npy

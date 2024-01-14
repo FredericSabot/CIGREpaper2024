@@ -1,0 +1,3 @@
+Component_type,Component_name,Param_id,L_bound,U_bound
+Transformer,TFO,r,0.3,2
+Transformer,TFO,x,0.5,4

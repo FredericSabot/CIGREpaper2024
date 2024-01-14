@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<curvesInput xmlns="http://www.rte-france.com/dynawo">
+  <curve model="InfBus" variable="infiniteBus_PPu"/>
+  <curve model="InfBus" variable="infiniteBus_QPu"/>
+  <curve model="GEN-slack" variable="generator_PGen"/>
+  <curve model="GEN-slack" variable="generator_QGen"/>
+  <curve model="NETWORK" variable="LINE-GEN_P2_value"/>
+  <curve model="NETWORK" variable="LINE-GEN_Q2_value"/>
+  <curve model="NETWORK" variable="LINE-GEN_U2_value"/>
+  <curve model="NETWORK" variable="B-MV_Upu_value"/>
+</curvesInput>
