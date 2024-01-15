@@ -29,3 +29,5 @@ IBG-G99_ibg_Kig 20.0
 TFO_r 2.0
 TFO_x 0.5
 tap 16
+slack_load_p -0.9184874567484153
+slack_load_q -0.21379739192709965

@@ -487,12 +487,13 @@ def build_dynamic_equivalent(load_ratio, der_capacity_factor, der_installed_shar
     best_run_id = results[-1].best_index + pop_size * (results[-1].best_iteration + 1)
     network = pp.network.load(os.path.join(working_dir, 'Optimisation', "It_%03d" % best_run_id, reduced_network_name + '.iidm'))
     tap = network.get_ratio_tap_changers().tap.values[0]
+    reduced_loads = network.get_loads()
+    slack_load_p = reduced_loads.at['LOAD-slack', 'p0']
+    slack_load_q = reduced_loads.at['LOAD-slack', 'q0']
 
     Path('Optimised_Parameters').mkdir(parents=True, exist_ok=True)
-    printParameters(results[-1], dyn_bounds, static_bounds, os.path.join('Optimised_Parameters', 'Optimised_parameters_' + parameter_string + '.txt'), additional_parameters = [('tap', tap)])
-    best_parameters = results[-1].best_parameters
-    with open(os.path.join(working_dir, 'Best_parameters.csv'), 'w') as file:
-        file.write(','.join([str(param) for param in best_parameters]))
+    printParameters(results[-1], dyn_bounds, static_bounds, os.path.join('Optimised_Parameters', 'Optimised_parameters_' + parameter_string + '.txt'),
+                    additional_parameters = [('tap', tap), ('slack_load_p', slack_load_p), ('slack_load_q', slack_load_q)])
 
     print("Objective: %f, converged: %d" % (results[-1].best_obj.total_obj, results[-1].converged))
     convergence_evolution = [r.best_obj.total_obj for r in results]
