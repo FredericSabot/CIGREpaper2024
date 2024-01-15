@@ -19,8 +19,7 @@ import pandas as pd
 import powerfactory as pf
 app = pf.GetApplication()
 app.Show()  # Show before project activation to see graphics
-app.ActivateProject('0. North GB Test System.IntPrj')
-app.Hide()  # Disable GUI during computations to avoid slowing down the script
+app.ActivateProject('0. North GB Test System 18.09.23.IntPrj')
 
 def find_by_loc_name(elements: list, loc_name: str):
     for element in elements:
@@ -99,24 +98,52 @@ def check_stability(results_csv, buses, sync_machines, t_end):
     return stable
 
 baseMVA = 100  # Sbase in Powerfactory
-year = 2031
-print('Study Year: %s' %year)
 
-# TODO: define scenarios
-scenario = 1
-if scenario == 1:  # Summer minimum PM Leading the way
-    SCOTLAND_WIND_AVAILABILITY = 0.8
-    NGET_WIND_AVAILABILITY = 0.8 * 0.58
-    SCENARIO_NAME = 'SummerPM_{}_leading'.format(year)
-    SOLAR_FACTOR = 0.68  # All-time peak according to https://www.solar.sheffield.ac.uk/pvlive/ (checked on 14/12/2023, peak reached on 2023-04-20 12:30PM which is not really in the summer)
-    CHP_FACTOR = 0.2
-elif scenario == 2:  # Winter peak Leading the way
-    SCOTLAND_WIND_AVAILABILITY = 0.8
-    NGET_WIND_AVAILABILITY = 0.8 * 0.7
+scenario = 4
+CASE = 'default'
+TARGET_PERCENTILE = 5
+if scenario == 0:
+    year = 2021
     SCENARIO_NAME = 'Winter_{}_leading'.format(year)
-    SOLAR_FACTOR = 0  # Winter evening
-    CHP_FACTOR = 0.7
+    HVDC_SETPOINT = 0.2
+    SCOTLAND_WIND_AVAILABILITY = 0.9  # Leads to 2.64GW through B6 (limit = 3.880)
+    NGET_WIND_AVAILABILITY = 0.8
+elif scenario == 1:
+    year = 2030
+    SCENARIO_NAME = 'Winter_{}_leading'.format(year)
+    HVDC_SETPOINT = 0.2
+    SCOTLAND_WIND_AVAILABILITY = 0.9  # Leads to 3.35GW through B4 (limit 5.2GW), 2.5GW through B6 (limit 4GW) + 9.8GW through HVDCs
+    NGET_WIND_AVAILABILITY = 0.8
+elif scenario == 2:
+    year = 2021
+    SCENARIO_NAME = 'SummerPM_{}_leading'.format(year)
+    HVDC_SETPOINT = -1
+    SCOTLAND_WIND_AVAILABILITY = 0.7  # Leads to 3.05GW through B4 (limit 3.3), 3.1 through G6 (limit 3.8) + 1.6GW HVDC, not dynamically stable, stable with lower B4 flow
+    NGET_WIND_AVAILABILITY = 0.7
+elif scenario == 3:
+    year = 2030
+    SCENARIO_NAME = 'SummerPM_{}_leading'.format(year)
+    HVDC_SETPOINT = None  # Flow defined by grid constraints and price-dependent loads
+    SCOTLAND_WIND_AVAILABILITY = 0.7 # Leads to 2.2GW through B4 (limit 5.2), 3.0 through B4 (limit 4GW) + 9GW through HVDCs
+    NGET_WIND_AVAILABILITY = 0.3
+elif scenario == 4:
+    year = 2030
+    SCENARIO_NAME = 'SummerAM_{}_leading'.format(year)
+    HVDC_SETPOINT = -0.4
+    SCOTLAND_WIND_AVAILABILITY = 0.1
+    NGET_WIND_AVAILABILITY = 0.1
 
+if 'Winter' in SCENARIO_NAME:
+    CHP_FACTOR = 0.7
+    SOLAR_FACTOR = 0  # Winter evening
+elif 'SummerPM' in SCENARIO_NAME:
+    CHP_FACTOR = 0.2
+    SOLAR_FACTOR = 0.68  # All-time peak according to https://www.solar.sheffield.ac.uk/pvlive/ (checked on 14/12/2023, peak reached on 2023-04-20 12:30PM which is not really in the summer)
+elif 'SummerAM' in SCENARIO_NAME:
+    CHP_FACTOR = 0.2
+    SOLAR_FACTOR = 0.1
+
+print('Scenario:', SCENARIO_NAME)
 
 # Activate the necessary network variations for the considered year
 variation_folder = app.GetProjectFolder("scheme")
@@ -124,15 +151,18 @@ Activevariations = app.GetActiveNetworkVariations()
 for Activevariation in Activevariations:  # Start by deactivating all
     Activevariation.Deactivate()
 for variation in variation_folder.GetContents():
-    if year == 2031 :
-        if variation.loc_name == '2030 NETWORK' or  variation.loc_name == 'SPf phase 2 (2030 network)' or  variation.loc_name == 'HVDC as 2-Terminal links & cable':
+    if year == 2030:
+        if variation.loc_name == '2030 NETWORK' or  variation.loc_name == 'SPf phase 2 (2031 network)' or  variation.loc_name == 'HVDC as 2-Terminal links & cable':
             variation.Activate()
     elif year == 2021:
         if variation.loc_name == 'SPf phase 2 (2021 network)':
             variation.Activate()
+app.Hide()  # Disable GUI during computations to avoid slowing down the script
 
 # Read network elements (note that they should be reloaded if a different network variation is activated) + sanity check
 loads = app.GetCalcRelevantObjects("*.ElmLod")
+loads_dynamic_equivalent = [load for load in loads if 'Slack load' in load.loc_name]
+loads = [load for load in loads if 'Slack load' not in load.loc_name]
 loads = [load for load in loads if not load.outserv]
 # loads = [load for load in loads if 'BESS' not in load.loc_name]
 loads_incl_hvdc = loads
@@ -149,6 +179,7 @@ with open(os.path.join('..', 'FES data', 'aggregated', SCENARIO_NAME + '.csv')) 
         scenario_data[row[0]] = [float(value) for value in row[1:]]
 
 for load in loads:
+    load.mode_inp = 'PQ'
     data = scenario_data[load.loc_name[-4:]]
     storage = 0  # Included in gross load
     solar = data[3]
@@ -158,20 +189,25 @@ for load in loads:
         wind_factor = NGET_WIND_AVAILABILITY
     else:
         wind_factor = SCOTLAND_WIND_AVAILABILITY
-    load.plini = data[0] - solar * SOLAR_FACTOR - wind * wind_factor - other * CHP_FACTOR  # Netted DERs, #TODO: model explicitly
+    load.plini = data[0] - solar * SOLAR_FACTOR - wind * wind_factor - other * CHP_FACTOR  # Netted DERs in OPF, splitted at the end
     load.qlini = data[1]  # Net Q
+    load.scale0 = 1
     if load.loc_name[-4:] == 'TUMM':
         load.qlini /= 2  # Necessary to get converging AC OPF, assumed to be handled by Tummel hydro power plant (not modelled)
     print(load.loc_name, load.plini, load.qlini)
 print('Total load', sum([load.plini for load in loads]))
 
 tfos = app.GetCalcRelevantObjects("*.ElmTr2")
+tfos_dynamic_equivalent = [tfo for tfo in tfos if 'Transformer CMPLDW' in tfo.loc_name]
+tfos = [tfo for tfo in tfos if 'Transformer CMPLDW' not in tfo.loc_name]
 tfos = [tfo for tfo in tfos if not tfo.outserv]
 tfos = [tfo for tfo in tfos if tfo.IsEnergized()]
 tfos = [tfo for tfo in tfos if tfo.bushv is not None and tfo.buslv is not None]
 tfos = [tfo for tfo in tfos if tfo.bushv.IsClosed() and tfo.buslv.IsClosed()]
 
 buses = app.GetCalcRelevantObjects("*.ElmTerm")
+buses_dynamic_equivalent = [bus for bus in buses if 'Load Bus' in bus.loc_name or 'System Bus' in bus.loc_name]
+buses = [bus for bus in buses if 'Load Bus' not in bus.loc_name and 'System Bus' not in bus.loc_name]
 buses = [bus for bus in buses if not bus.outserv]
 buses = [bus for bus in buses if bus.IsEnergized()]
 buses = [bus for bus in buses if 'DC-BusBar' not in bus.loc_name]  # DC buses of statcoms
@@ -195,6 +231,8 @@ else:
 boundary_B6 = find_by_loc_name(boundaries, 'B6 Boundary')
 
 breakers = app.GetCalcRelevantObjects("*.ElmCoup")
+breakers_dynamic_equivalent = [breaker for breaker in breakers if 'Switch CMPLDW' in breaker.loc_name]
+breakers = [breaker for breaker in breakers if 'Switch CMPLDW' not in breaker.loc_name]
 breakers = [breaker for breaker in breakers if breaker.IsEnergized()]
 breakers = [breaker for breaker in breakers if breaker.on_off]
 breakers = [breaker for breaker in breakers if breaker.bus1 is not None and breaker.bus2 is not None]
@@ -412,10 +450,37 @@ IBRs = app.GetCalcRelevantObjects("*.ElmGenstat")  # includes HVDCs under ElmGen
 if year == 2030:
     find_by_loc_name(IBRs, 'DC BESS').pgini = 0 # 120 (*7) in original data
 IBRs = [ibr for ibr in IBRs if ibr.loc_name != 'EFR BESS' and ibr.loc_name != 'DC BESS']
+IBRs_dynamic_equivalent = [ibr for ibr in IBRs if 'Motor' in ibr.loc_name or 'DER_legacy' in ibr.loc_name or 'DER_G99' in ibr.loc_name or 'Static Load' in ibr.loc_name]
+IBRs = [ibr for ibr in IBRs if 'Motor' not in ibr.loc_name and 'DER_legacy' not in ibr.loc_name and 'DER_G99' not in ibr.loc_name and 'Static Load' not in ibr.loc_name]
 IBRs = [ibr for ibr in IBRs if not ibr.outserv]
 wind_gens = [ibr for ibr in IBRs if 'HVDC' not in ibr.loc_name]
 # HVDC_LCC = app.GetCalcRelevantObjects("*.ElmHvdclcc")  # Not used (outserv)
 hvdc_links = [ibr for ibr in IBRs if 'HVDC' in ibr.loc_name]
+
+
+# Disconnect dynamic equivalents for the dispatch (set them back at the end)
+for load in loads_dynamic_equivalent:
+    load.outserv = 1
+for tfo in tfos_dynamic_equivalent:
+    tfo.outserv = 1
+for bus in buses_dynamic_equivalent:
+    bus.outserv = 1
+for breaker in breakers_dynamic_equivalent:
+    breaker.on_off = 0
+for ibr in IBRs_dynamic_equivalent:
+    ibr.outserv = 1
+
+for load in loads:
+    data = scenario_data[load.loc_name[-4:]]
+    storage = 0  # Included in gross load
+    solar = data[3]
+    wind = data[4]
+    other = data[6]
+    if load.cpZone.loc_name == 'NGET':
+        wind_factor = NGET_WIND_AVAILABILITY
+    else:
+        wind_factor = SCOTLAND_WIND_AVAILABILITY
+    load.plini = data[0] - (solar * SOLAR_FACTOR + wind * wind_factor + other * CHP_FACTOR)
 
 hvdc_embedded_1 = []
 hvdc_embedded_2 = []
@@ -542,7 +607,9 @@ for sync_gen in sync_gens:
         sync_Qmax.append(sync_gen.P_max * sync_gen.ngnum / baseMVA * (1-0.9**2)**0.5)
         droop.append(0)
 
-    if sync_gen.cCategory == 'Hydro' or sync_gen.cCategory == 'Others':  # SG PSH WIYH2
+    if sync_gen.loc_name == 'SG AGR NGET4':
+        sync_gen_costs.append(45 * baseMVA)
+    elif sync_gen.cCategory == 'Hydro' or sync_gen.cCategory == 'Others':  # SG PSH WIYH2
         sync_gen_costs.append(20 * baseMVA)
     elif sync_gen.cCategory == 'Gas':
         sync_gen_costs.append(80 * baseMVA)
@@ -640,13 +707,17 @@ for hvdc_interconnection in hvdc_interconnections:
     hvdc_max = hvdc_interconnection.sgn * hvdc_interconnection.cosn * hvdc_interconnection.ngnum / baseMVA
     if hvdc_interconnection.loc_name == 'HVDC IC NSL':
         hvdc_max = 1400 / baseMVA
-    hvdc_interconnection_min.append(-hvdc_max)
-    hvdc_interconnection_max.append(hvdc_max)
+    if HVDC_SETPOINT is not None:
+        hvdc_interconnection_min.append(hvdc_max * HVDC_SETPOINT)
+        hvdc_interconnection_max.append(hvdc_max * HVDC_SETPOINT)
+    else:
+        hvdc_interconnection_min.append(hvdc_max * (-1))
+        hvdc_interconnection_max.append(hvdc_max * 1)
     hvdc_interconnection_Qmin.append(- hvdc_interconnection.sgn * (1-hvdc_interconnection.cosn**2)**0.5 * hvdc_interconnection.ngnum / baseMVA)
     hvdc_interconnection_Qmax.append(hvdc_interconnection.sgn * (1-hvdc_interconnection.cosn**2)**0.5 * hvdc_interconnection.ngnum / baseMVA)
 # Sum of HVDC connections via England (modelled as load)
 if year == 2021:
-    hvdc_max = 6000 / baseMVA
+    hvdc_max = (8400 - 1400) / baseMVA  # Total GB interconnections - Scotland ones
 elif year == 2030:
     hvdc_max = (15900 - 2800) / baseMVA
 else:
@@ -806,11 +877,6 @@ theta_DC = list({rec.keys[0]:rec.level for rec in db_postDC["theta0"]}.values())
 
 cost = db_postDC["total_cost"].first_record().level
 
-load_shedding_DC = {rec.keys[0]:rec.level for rec in db_postDC["load_shedding"]}
-for i, load_shedding in load_shedding_DC.values():
-    if load_shedding > 0:
-        raise RuntimeError('DC OPF needed to apply load shedding at bus', buses[i].loc_name)
-
 print('Total cost:', round(cost, 2))
 print('Sync gen:', sum(P_DC_sync) * baseMVA / 1000, ' / ', sum(sync_max) * baseMVA / 1000, 'GW')
 print('Wind gen:', (sum(P_DC_wind) + sum(P_DC_hvdc_spit)) * baseMVA / 1000, ' / ', (sum(wind_max) + spit_total_max) * baseMVA / 1000, 'GW')
@@ -823,6 +889,11 @@ print('Total generation:', total_generation * baseMVA / 1000, 'GW')
 print('Price-responsive load:', sum(P_DC_dispatchable_load) * baseMVA / 1000, ' / ', sum(dispatchable_load_max) * baseMVA / 1000, 'GW')
 print('Generation/load imbalance (should be 0 in DC approx):', (total_generation - total_demand) * baseMVA / 1000, 'GW')
 print('Total embedded HVDC flows (North-South):', -sum(P_DC_hvdc_embedded) * baseMVA / 1000, ' / ', sum(hvdc_embedded_max) * baseMVA / 1000, 'GW')
+
+load_shedding_DC = {rec.keys[0]:rec.level for rec in db_postDC["load_shedding"]}
+for i, load_shedding in load_shedding_DC.items():
+    if load_shedding > 0.1:
+        raise RuntimeError('DC OPF needed to apply load shedding at bus', buses[int(i)].loc_name)
 
 # print((abs(pf_DC['24']) + abs(pf_DC['25']) + abs(pf_DC['26']) + abs(pf_DC['27']) +  abs(pf_DC['30'])*2)*baseMVA/1000)  # AC flows parallel to HVDC embedded (through B7 boundary)
 
@@ -1256,6 +1327,7 @@ while True:
     if set(current_critical_contingencies).issubset(critical_contingencies):  # No new critical contingencies compared to last iteration
         # Statically secured, so now check dynamic stability and limit flows through boundaries B4 and B6 if needed
         dynamic_secure = True
+        # break
 
         B4_events = []
         if year == 2021:
@@ -1543,6 +1615,271 @@ print('Total embedded HVDC flows (North-South):', -sum(P_PSCAC_hvdc_embedded) * 
 
 if len(current_critical_contingencies) > 0:
     print('Warning: remaining unsecured contingencies (diff between OPF and Powerfactory)', current_critical_contingencies)
+
+
+###
+# Replace loads by dynamic equivalents
+###
+
+SOLAR_CAPACITY_CORRECTION = 0.8  # The inverter of PV is often under-dimnensioned as PV rarely output 100% of their capacity
+# So, reduce the installed capacity of PV compared to FES data and increase the capacity factor to compensate (same total
+# output, but lower capacity)
+if SOLAR_FACTOR > SOLAR_CAPACITY_CORRECTION:
+    raise ValueError()
+SOLAR_FACTOR = SOLAR_FACTOR / SOLAR_CAPACITY_CORRECTION
+
+peak_loads = {}
+with open(os.path.join('..', 'FES data', 'aggregated', 'Winter_{}_leading'.format(year) + '.csv')) as csv_file:
+    reader = csv.reader(csv_file)
+    next(reader)  # Skip header
+    for row in reader:
+        load_name = row[0]
+        P_gross = float(row[1])
+        peak_loads[load_name] = P_gross
+with open(os.path.join('..', 'FES data', 'aggregated', 'SummerPM_{}_leading'.format(year) + '.csv')) as csv_file:
+    reader = csv.reader(csv_file)
+    next(reader)  # Skip header
+    for row in reader:
+        load_name = row[0]
+        P_gross = float(row[1])
+        peak_loads[load_name] = max(P_gross, peak_loads[load_name])
+
+for load in loads:
+    load_name = load.loc_name[-4:]
+    data = scenario_data[load_name]
+    P_gross = data[0]
+    Q_net = data[1]
+    storage = 0  # Included in gross load
+    solar = data[3] * SOLAR_CAPACITY_CORRECTION
+    wind = data[4]
+    # hydro = 0  # Neglected
+    other = data[6]
+
+    if load_name != 'BEAU':
+        pass
+        # continue
+
+    if load_name == 'NGET':
+        continue
+
+    load.scale0 = 0  # Replace load by dynamic equivalent
+
+    if load.cpZone.loc_name == 'NGET':
+        wind_factor = NGET_WIND_AVAILABILITY
+    else:
+        wind_factor = SCOTLAND_WIND_AVAILABILITY
+
+    P_gross = P_gross - other * CHP_FACTOR
+
+    load_ratio = P_gross / peak_loads[load_name]
+    der_installed_share = (solar + wind) / peak_loads[load_name]
+    der_capacity_factor = (solar * SOLAR_FACTOR + wind * wind_factor) / (solar + wind)
+
+    if load.cpZone.loc_name == 'NGET':
+        wind_non_grid_code_share = 1 - 0.29
+    elif load.cpZone.loc_name == 'SPT':
+        wind_non_grid_code_share = 1 - 0.43
+    elif load.cpZone.loc_name == 'SHET':
+        wind_non_grid_code_share = 1 - 0.73
+    else:
+        raise NotImplementedError(load_name)
+
+    if year == 2021:
+        der_legacy_share = (solar + wind * wind_non_grid_code_share) / (solar + wind)
+    elif year == 2030:
+        if CASE == 'default':  # Legacy counts both plants installed before Apr 2019 and plants with a capacity < 16A per phase
+            der_legacy_share = (solar * (0.23 + 0.41) + wind * 0.83 * wind_non_grid_code_share) / (solar + wind)
+        elif CASE == 'G99_extended':  # G99 also applied to new PV plants even if capa < 16A
+            der_legacy_share = (solar * 0.23 + wind * 0.83 * wind_non_grid_code_share) / (solar + wind)
+            raise NotImplementedError('First decide to which plant to extend it to')
+
+    load_ratio = round(load_ratio, 2)
+    der_capacity_factor = round(der_capacity_factor, 2)
+    der_installed_share = round(der_installed_share, 2)
+    der_legacy_share = round(der_legacy_share, 2)
+
+    parameter_string = '_'.join([str(i) for i in [load_ratio, der_capacity_factor, der_installed_share, der_legacy_share, TARGET_PERCENTILE]])
+    # print(load_name, parameter_string)
+
+    dynamic_equivalent_parameters = {}
+    with open(os.path.join('..', 'distrib_networks', 'Optimised_Parameters', 'Optimised_parameters_' + parameter_string + '.txt')) as file:
+        reader = csv.reader(file, delimiter=' ')
+        for row in reader:
+            dynamic_equivalent_parameters[row[0]] = float(row[1])
+
+    motor_a = find_by_loc_name(IBRs_dynamic_equivalent, 'Motor A {}'.format(load_name))
+    motor_b = find_by_loc_name(IBRs_dynamic_equivalent, 'Motor B {}'.format(load_name))
+    motor_c = find_by_loc_name(IBRs_dynamic_equivalent, 'Motor C {}'.format(load_name))
+    motor_a_ctrl = motor_a.qdslCtrl
+    motor_a.c_pmod.pelm[7].configScript.obj_id = [motor_a_ctrl]  # Add missing object in config file of motor dynamic models (not copied in template)
+    motor_b_ctrl = motor_b.qdslCtrl
+    motor_b.c_pmod.pelm[8].configScript.obj_id = [motor_b_ctrl]
+    motor_c_ctrl = motor_c.qdslCtrl
+    motor_c.c_pmod.pelm[9].configScript.obj_id = [motor_c_ctrl]
+
+    der_legacy = find_by_loc_name(IBRs_dynamic_equivalent, 'DER_legacy {}'.format(load_name))
+    der_legacy_model = der_legacy.c_pmod.pelm[1]
+
+    der_G99 = find_by_loc_name(IBRs_dynamic_equivalent, 'DER_G99 {}'.format(load_name))
+    der_G99_model = der_G99.c_pmod.pelm[1]
+
+    der_load = find_by_loc_name(IBRs_dynamic_equivalent, 'Static Load {}'.format(load_name))
+    der_load_model = der_load.c_pmod.pelm[11]
+
+    der_slack_load = find_by_loc_name(loads_dynamic_equivalent, 'Slack load {}'.format(load_name))
+
+    der_tfo = find_by_loc_name(tfos_dynamic_equivalent, 'Transformer CMPLDW {}'.format(load_name))
+    der_tfo_type = der_tfo.typ_id
+
+
+    Pnom = peak_loads[load_name]
+    der_legacy.sgn = Pnom * der_installed_share * der_legacy_share
+    der_legacy.pgini = Pnom * der_installed_share * der_capacity_factor * der_legacy_share
+    der_legacy.qgini = 0
+    der_G99.sgn = Pnom * der_installed_share * (1-der_legacy_share)
+    der_G99.pgini = Pnom * der_installed_share * der_capacity_factor * (1-der_legacy_share)
+    der_G99.qgini = 0
+    der_tfo_type.strn = Pnom
+
+    motor_share = 0
+    for param, value in dynamic_equivalent_parameters.items():
+        if param == 'LOAD_load_Alpha':
+            der_load_model.SetAttribute('P1e', value)
+        elif param == 'LOAD_load_Beta':
+            der_load_model.SetAttribute('Q1e', value)
+        elif param == 'LOAD_load_ActiveMotorShare_0_':
+            motor_a.qdslCtrl.SetAttribute('P', Pnom * value)
+            motor_a.sgn = Pnom * value
+            motor_share += value
+        elif param == 'LOAD_load_ActiveMotorShare_1_':
+            motor_b.qdslCtrl.SetAttribute('P', Pnom * value)
+            motor_b.sgn = Pnom * value
+            motor_share += value
+        elif param == 'LOAD_load_ActiveMotorShare_2_':
+            motor_c.qdslCtrl.SetAttribute('P', Pnom * value)
+            motor_c.sgn = Pnom * value
+            motor_share += value
+        elif param == 'IBG-legacy_ibg_IMaxPu':
+            der_legacy_model.SetAttribute('Imax', value)
+        elif param == 'IBG-legacy_ibg_IpRateLimMax':
+            der_legacy_model.SetAttribute('rrpwr', value)
+        elif param == 'IBG-legacy_ibg_ULVRTMinPu':
+            der_legacy_model.SetAttribute('ULVRTMinPu', value)
+        elif param == 'IBG-legacy_ibg_ULVRTArmingPu':
+            der_legacy_model.SetAttribute('ULVRTArmingPu', value)
+        elif param == 'IBG-legacy_ibg_LVRTc':
+            der_legacy_model.SetAttribute('c', value)
+        elif param == 'IBG-legacy_ibg_LVRTd':
+            der_legacy_model.SetAttribute('d', value)
+        elif param == 'IBG-legacy_ibg_LVRTg':
+            der_legacy_model.SetAttribute('g', value)
+        elif param == 'IBG-legacy_ibg_LVRTh':
+            der_legacy_model.SetAttribute('h', value)
+        elif param == 'IBG-legacy_ibg_Kpg':
+            der_legacy_model.SetAttribute('Kpg', value)
+        elif param == 'IBG-legacy_ibg_Kig':
+            der_legacy_model.SetAttribute('Kig', value)
+        elif param == 'IBG-G99_ibg_KQsupportPu':
+            der_G99_model.SetAttribute('Kqv', value)
+        elif param == 'IBG-G99_ibg_IMaxPu':
+            der_G99_model.SetAttribute('Imax', value)
+        elif param == 'IBG-G99_ibg_IpRateLimMax':
+            der_G99_model.SetAttribute('rrpwr', value)
+        elif param == 'IBG-G99_ibg_VDeadzoneMaxPu':
+            der_G99_model.SetAttribute('dbd2', value)
+        elif param == 'IBG-G99_ibg_VDeadzoneMinPu':
+            der_G99_model.SetAttribute('dbd1', value)
+        elif param == 'IBG-G99_ibg_ULVRTMinPu':
+            der_G99_model.SetAttribute('ULVRTMinPu', value)
+        elif param == 'IBG-G99_ibg_ULVRTArmingPu':
+            der_G99_model.SetAttribute('ULVRTMinPu', value)
+        elif param == 'IBG-G99_ibg_LVRTc':
+            der_G99_model.SetAttribute('c', value)
+        elif param == 'IBG-G99_ibg_LVRTd':
+            der_G99_model.SetAttribute('d', value)
+        elif param == 'IBG-G99_ibg_LVRTg':
+            der_G99_model.SetAttribute('g', value)
+        elif param == 'IBG-G99_ibg_LVRTh':
+            der_G99_model.SetAttribute('h', value)
+        elif param == 'IBG-G99_ibg_Kpg':
+            der_G99_model.SetAttribute('Kpg', value)
+        elif param == 'IBG-G99_ibg_Kig':
+            der_G99_model.SetAttribute('Kig', value)
+        elif param == 'TFO_r':
+            der_tfo_type.r1pu = value / (33**2 / 100)
+        elif param == 'TFO_x':
+            der_tfo_type.x1pu = value / (33**2 / 100)
+        elif param == 'tap':
+            der_tfo_type.dutap = -1.5  # Increase tap, increase LV voltage
+            der_tfo_type.tap_side = 0  # HV side, i.e. tap is before impedance model
+            der_tfo.optapmin = -10
+            der_tfo_type.ntpmn = -10
+            der_tfo.optapmax = 10
+            der_tfo_type.ntpmx = 10
+            der_tfo.nntap = int(value - 10)
+            der_tfo_type.itrdl = 0  # Transformer resistance modelled purely at secondary in Powsybl
+            der_tfo_type.itrdr = 0
+        elif param == 'slack_load_p':
+            der_slack_load.plini = value * Pnom / 100
+        elif param == 'slack_load_q':
+            der_slack_load.qlini = value * Pnom / 100 + Q_net
+        else:
+            raise NotImplementedError(param)
+
+    der_legacy_model.SetAttribute('tLVRTMin', 0.14)
+    der_legacy_model.SetAttribute('tLVRTMax', 2.2)
+
+    der_load.pgini = -P_gross * (1-motor_share)
+    der_load.qdslCtrl.SetAttribute('Qcmpldw', 0)
+    der_load.sgn = 999999
+    der_load.cosn = 1
+
+# Reconnect dynamic equivalents
+for load in loads_dynamic_equivalent:
+    load.outserv = 0
+for tfo in tfos_dynamic_equivalent:
+    tfo.outserv = 0
+for bus in buses_dynamic_equivalent:
+    bus.outserv = 0
+for breaker in breakers_dynamic_equivalent:
+    breaker.on_off = 1
+for ibr in IBRs_dynamic_equivalent:
+    ibr.outserv = 0
+
+# Adapt slack loads such that net load of dynamic equivalent match actual load
+run_load_flow()
+mismatch_P = {}
+mismatch_Q = {}
+for load in loads:
+    load_name = load.loc_name[-4:]
+    if load_name == 'NGET':
+        continue
+    data = scenario_data[load_name]
+    solar = data[3]
+    wind = data[4]
+    other = data[6]
+    if load.cpZone.loc_name == 'NGET':
+        wind_factor = NGET_WIND_AVAILABILITY
+    else:
+        wind_factor = SCOTLAND_WIND_AVAILABILITY
+
+    P_net = data[0] - solar * SOLAR_FACTOR - wind * wind_factor - other * CHP_FACTOR
+    Q_net = data[1]
+
+    breaker = find_by_loc_name(breakers_dynamic_equivalent, 'Switch CMPLDW {}'.format(load_name))
+    P_calc = breaker.GetAttribute('m:Psum:bus1')
+    Q_calc = breaker.GetAttribute('m:Qsum:bus1')
+
+    mismatch_P[load_name] = P_net - P_calc
+    mismatch_Q[load_name] = Q_net - Q_calc
+
+for load in loads:
+    load_name = load.loc_name[-4:]
+    if load_name == 'NGET':
+        continue
+    der_slack_load = find_by_loc_name(loads_dynamic_equivalent, 'Slack load {}'.format(load_name))
+    der_slack_load.plini += mismatch_P[load_name]
+    der_slack_load.qlini += mismatch_Q[load_name]
 
 run_load_flow()
 app.Show()
