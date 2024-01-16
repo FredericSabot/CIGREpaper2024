@@ -112,7 +112,7 @@ elif scenario == 1:
     year = 2030
     SCENARIO_NAME = 'Winter_{}_leading'.format(year)
     HVDC_SETPOINT = 0.2
-    SCOTLAND_WIND_AVAILABILITY = 0.9  # Leads to 3.35GW through B4 (limit 5.2GW), 2.5GW through B6 (limit 4GW) + 9.8GW through HVDCs
+    SCOTLAND_WIND_AVAILABILITY = 0.9  # Leads to 3.0GW through B4 (limit 5.2GW), 2.5GW through B6 (limit 4GW) + 9.8GW through HVDCs
     NGET_WIND_AVAILABILITY = 0.8
 elif scenario == 2:
     year = 2021
@@ -124,7 +124,7 @@ elif scenario == 3:
     year = 2030
     SCENARIO_NAME = 'SummerPM_{}_leading'.format(year)
     HVDC_SETPOINT = None  # Flow defined by grid constraints and price-dependent loads
-    SCOTLAND_WIND_AVAILABILITY = 0.7 # Leads to 2.2GW through B4 (limit 5.2), 3.0 through B4 (limit 4GW) + 9GW through HVDCs
+    SCOTLAND_WIND_AVAILABILITY = 0.7 # Leads to 2.8GW through B4 (limit 5.2), 3.3 through B4 (limit 4GW) + 8.8GW through HVDCs
     NGET_WIND_AVAILABILITY = 0.3
 elif scenario == 4:
     year = 2030
@@ -577,7 +577,7 @@ droop = []
 sync_gen_costs = []
 for sync_gen in sync_gens:
     # Pmin
-    if sync_gen.loc_name == 'SG HC SLACK NGET4':
+    if sync_gen.loc_name == 'SG HC SLACK NGET4' or sync_gen.loc_name == 'SG AGR NGET4':
         sync_min.append(0)
     elif sync_gen.cCategory == 'Hydro' or sync_gen.cCategory == 'Others':  # SG PSH WIYH2
         if 'PSH' in sync_gen.loc_name:
@@ -869,7 +869,7 @@ for i in range(1, N_sync_gens + 1):
         on_DC['{}'.format(i)] = 0  # Readd values that GAMS deletes for some reason
 on_DC = list(on_DC.values())
 for i, sync_gen in enumerate(sync_gens):
-    if sync_gen.cCategory == 'Hydro' or sync_gen.cCategory == 'Others':  # SG PSH WIYH2
+    if sync_gen.cCategory == 'Hydro' or sync_gen.cCategory == 'Others' or sync_gen.cCategory == 'Nuclear' or sync_gen.loc_name == 'SG HC SLACK NGET4':
         on_DC[i] = 1  # Do not disconnect hydro plants
 
 pf_DC = {rec.keys[0]:rec.level for rec in db_postDC["pf0"]}
@@ -1748,16 +1748,16 @@ for load in loads:
         elif param == 'LOAD_load_Beta':
             der_load_model.SetAttribute('Q1e', value)
         elif param == 'LOAD_load_ActiveMotorShare_0_':
-            motor_a.qdslCtrl.SetAttribute('P', Pnom * value)
-            motor_a.sgn = Pnom * value
+            motor_a.qdslCtrl.SetAttribute('P', P_gross * value)
+            motor_a.sgn = P_gross * value
             motor_share += value
         elif param == 'LOAD_load_ActiveMotorShare_1_':
-            motor_b.qdslCtrl.SetAttribute('P', Pnom * value)
-            motor_b.sgn = Pnom * value
+            motor_b.qdslCtrl.SetAttribute('P', P_gross * value)
+            motor_b.sgn = P_gross * value
             motor_share += value
         elif param == 'LOAD_load_ActiveMotorShare_2_':
-            motor_c.qdslCtrl.SetAttribute('P', Pnom * value)
-            motor_c.sgn = Pnom * value
+            motor_c.qdslCtrl.SetAttribute('P', P_gross * value)
+            motor_c.sgn = P_gross * value
             motor_share += value
         elif param == 'IBG-legacy_ibg_IMaxPu':
             der_legacy_model.SetAttribute('Imax', value)
@@ -1855,7 +1855,7 @@ for load in loads:
     if load_name == 'NGET':
         continue
     data = scenario_data[load_name]
-    solar = data[3]
+    solar = data[3] * SOLAR_CAPACITY_CORRECTION
     wind = data[4]
     other = data[6]
     if load.cpZone.loc_name == 'NGET':

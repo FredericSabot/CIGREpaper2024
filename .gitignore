@@ -4,6 +4,7 @@ SCOPF/**/*.pf
 SCOPF/**/*.dat
 SCOPF/**/*.log*
 SCOPF/**/*.lxi
+SCOPF/**/*.cmd
 SCOPF/results.csv
 **/curves/*
 *.log
