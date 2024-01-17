@@ -628,8 +628,8 @@ if __name__ == '__main__':
                             der_legacy_share = (solar * 0.23 + wind * 0.83 * wind_non_grid_code_share) / (solar + wind)
 
                     if case == 'G99_extended':
-                        continue  # First decide if want to include old wind plants in G99 (compare capa with PV)
-                        # Or extend G99 to old units that are >1MW
+                        if year != 2030:
+                            continue
 
                     load_ratio = round(load_ratio, 2)
                     der_capacity_factor = round(der_capacity_factor, 2)
