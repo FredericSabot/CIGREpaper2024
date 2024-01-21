@@ -451,16 +451,16 @@ def add_grid_supply(network: pp.network.Network, network_name, book, dyd_root, p
         {'type': 'DOUBLE', 'name': 'generator_Tpq0', 'value': '1.572'},
         {'type': 'DOUBLE', 'name': 'generator_Tppq0', 'value': '0.084'},
         {'type': 'DOUBLE', 'name': 'generator_UNom', 'value': '1'},
-        {'type': 'DOUBLE', 'name': 'generator_SNom', 'value': str(total_demand * 3.3)},
-        {'type': 'DOUBLE', 'name': 'generator_PNomTurb', 'value': str(total_demand * 3)},
-        {'type': 'DOUBLE', 'name': 'generator_PNomAlt', 'value': str(total_demand * 3)},
-        {'type': 'DOUBLE', 'name': 'generator_SnTfo', 'value': str(total_demand * 3.3)},
+        {'type': 'DOUBLE', 'name': 'generator_SNom', 'value': str(total_demand * 2.2)},
+        {'type': 'DOUBLE', 'name': 'generator_PNomTurb', 'value': str(total_demand * 2)},
+        {'type': 'DOUBLE', 'name': 'generator_PNomAlt', 'value': str(total_demand * 2)},
+        {'type': 'DOUBLE', 'name': 'generator_SnTfo', 'value': str(total_demand * 2.2)},
         {'type': 'DOUBLE', 'name': 'generator_UNomHV', 'value': '1'},
         {'type': 'DOUBLE', 'name': 'generator_UNomLV', 'value': '1'},
         {'type': 'DOUBLE', 'name': 'generator_UBaseHV', 'value': '1'},
         {'type': 'DOUBLE', 'name': 'generator_UBaseLV', 'value': '1'},
         {'type': 'DOUBLE', 'name': 'generator_RTfPu', 'value': '0.0'},
-        {'type': 'DOUBLE', 'name': 'generator_XTfPu', 'value': str(0.2 * 3)},  # Represents 0.1 for the TFO and 0.1 for a line between the TFO and slack bus
+        {'type': 'DOUBLE', 'name': 'generator_XTfPu', 'value': str(0.2 * 2)},  # Represents 0.1 for the TFO and 0.1 for a line between the TFO and slack bus
         {'type': 'DOUBLE', 'name': 'voltageRegulator_LagEfdMax', 'value': '0'},
         {'type': 'DOUBLE', 'name': 'voltageRegulator_LagEfdMin', 'value': '0'},
         {'type': 'DOUBLE', 'name': 'voltageRegulator_EfdMinPu', 'value': '-5'},
@@ -470,8 +470,8 @@ def add_grid_supply(network: pp.network.Network, network_name, book, dyd_root, p
         {'type': 'DOUBLE', 'name': 'voltageRegulator_Gain', 'value': '20'},
         {'type': 'DOUBLE', 'name': 'governor_KGover', 'value': '5'},
         {'type': 'DOUBLE', 'name': 'governor_PMin', 'value': '0'},
-        {'type': 'DOUBLE', 'name': 'governor_PMax', 'value': str(total_demand * 3)},
-        {'type': 'DOUBLE', 'name': 'governor_PNom', 'value': str(total_demand * 3)},
+        {'type': 'DOUBLE', 'name': 'governor_PMax', 'value': str(total_demand * 2)},
+        {'type': 'DOUBLE', 'name': 'governor_PNom', 'value': str(total_demand * 2)},
     ]
     for par_attrib in par_attribs:
         etree.SubElement(gen_par_set, etree.QName(NAMESPACE, 'par'), par_attrib)

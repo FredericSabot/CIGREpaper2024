@@ -520,7 +520,7 @@ def build_dynamic_equivalent(load_ratio, der_capacity_factor, der_installed_shar
 
 if __name__ == '__main__':
     NGET_loads = ['HARK', 'STEW', 'HAWP', 'NORT']
-    SPT_loads = ['LOAN', 'WYHI', 'HUNE', 'STHA', 'COCK']
+    SPT_loads = ['LOAN', 'WIYH', 'HUNE', 'STHA', 'COCK']
     SSEN_loads = ['TUMM', 'TEAL', 'KINT', 'PEHE', 'BEAU', 'BLHI']
 
     for scenario in range(5):

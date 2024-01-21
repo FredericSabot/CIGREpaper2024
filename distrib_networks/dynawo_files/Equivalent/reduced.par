@@ -234,10 +234,10 @@
     <par type="DOUBLE" name="generator_Tpq0" value="1.572"/>
     <par type="DOUBLE" name="generator_Tppq0" value="0.084"/>
     <par type="DOUBLE" name="generator_UNom" value="1"/>
-    <par type="DOUBLE" name="generator_SNom" value="330"/>
-    <par type="DOUBLE" name="generator_PNomTurb" value="300"/>
-    <par type="DOUBLE" name="generator_PNomAlt" value="300"/>
-    <par type="DOUBLE" name="generator_SnTfo" value="330"/>
+    <par type="DOUBLE" name="generator_SNom" value="220"/>
+    <par type="DOUBLE" name="generator_PNomTurb" value="200"/>
+    <par type="DOUBLE" name="generator_PNomAlt" value="200"/>
+    <par type="DOUBLE" name="generator_SnTfo" value="220"/>
     <par type="DOUBLE" name="generator_UNomHV" value="1"/>
     <par type="DOUBLE" name="generator_UNomLV" value="1"/>
     <par type="DOUBLE" name="generator_UBaseHV" value="1"/>
