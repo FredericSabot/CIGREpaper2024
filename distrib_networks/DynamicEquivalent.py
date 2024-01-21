@@ -605,6 +605,9 @@ if __name__ == '__main__':
 
                 P_gross = P_gross - other * CHP_FACTOR
 
+                if SOLAR_FACTOR == 0:
+                    solar = 0  # Disable PV panels at night
+
                 load_ratio = P_gross / peak_loads[load_name]
                 der_installed_share = (solar + wind) / peak_loads[load_name]
                 der_capacity_factor = (solar * SOLAR_FACTOR + wind * wind_factor) / (solar + wind)
