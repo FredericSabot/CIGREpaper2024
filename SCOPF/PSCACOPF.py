@@ -106,19 +106,19 @@ if scenario == 0:
     year = 2021
     SCENARIO_NAME = 'Winter_{}_leading'.format(year)
     HVDC_SETPOINT = 0.2
-    SCOTLAND_WIND_AVAILABILITY = 0.9  # Leads to 2.64GW through B6 (limit = 3.880)
+    SCOTLAND_WIND_AVAILABILITY = 0.9
     NGET_WIND_AVAILABILITY = 0.8
 elif scenario == 1:
     year = 2030
     SCENARIO_NAME = 'Winter_{}_leading'.format(year)
     HVDC_SETPOINT = 0.2
-    SCOTLAND_WIND_AVAILABILITY = 0.9  # Leads to 3.0GW through B4 (limit 5.2GW), 2.5GW through B6 (limit 4GW) + 9.8GW through HVDCs
+    SCOTLAND_WIND_AVAILABILITY = 0.9
     NGET_WIND_AVAILABILITY = 0.8
 elif scenario == 2:
     year = 2021
     SCENARIO_NAME = 'SummerPM_{}_leading'.format(year)
     HVDC_SETPOINT = -1
-    SCOTLAND_WIND_AVAILABILITY = 0.7  # Leads to 3.05GW through B4 (limit 3.3), 3.1 through G6 (limit 3.8) + 1.6GW HVDC, not dynamically stable, stable with lower B4 flow
+    SCOTLAND_WIND_AVAILABILITY = 0.7
     NGET_WIND_AVAILABILITY = 0.7
 elif scenario == 3:
     year = 2030
@@ -1737,20 +1737,24 @@ for load in loads:
     der_tfo_type.strn = Pnom
 
     motor_share = 0
+    motor_multi = 1  # Set to 0.01 to disable motors, 1 to enable
     for param, value in dynamic_equivalent_parameters.items():
         if param == 'LOAD_load_Alpha':
             der_load_model.SetAttribute('P1e', value)
         elif param == 'LOAD_load_Beta':
             der_load_model.SetAttribute('Q1e', value)
         elif param == 'LOAD_load_ActiveMotorShare_0_':
+            value *= motor_multi
             motor_a.qdslCtrl.SetAttribute('P', P_gross * value)
             motor_a.sgn = P_gross * value
             motor_share += value
         elif param == 'LOAD_load_ActiveMotorShare_1_':
+            value *= motor_multi
             motor_b.qdslCtrl.SetAttribute('P', P_gross * value)
             motor_b.sgn = P_gross * value
             motor_share += value
         elif param == 'LOAD_load_ActiveMotorShare_2_':
+            value *= motor_multi
             motor_c.qdslCtrl.SetAttribute('P', P_gross * value)
             motor_c.sgn = P_gross * value
             motor_share += value
