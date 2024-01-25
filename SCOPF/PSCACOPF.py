@@ -400,7 +400,7 @@ branch_p_max = []
 for line in lines:
     branch_p_max.append(line.typ_id.uline * line.Inom * 3**0.5 / baseMVA)  # Inom includes number of parallel lines (nlnum)
 for tfo in tfos:
-    branch_p_max.append(tfo.Snom / baseMVA)
+    branch_p_max.append(tfo.Snom / baseMVA)  # Inom includes number of parallel lines (nlnum)
 for breaker in breakers:
     branch_p_max.append(999)
 for series_capa in series_capas:
@@ -740,15 +740,6 @@ for hvdc in hvdc_spit:
     hvdc_spit_Qmax.append(hvdc.sgn * (1-hvdc.cosn**2)**0.5 * hvdc.ngnum / baseMVA)
 
 csv_path = 'dispatchable_loads_max.csv'
-"""
-if not os.path.isfile(csv_path):
-    print('Saving current load dispatch as maximum demand for dispatchable loads (i.e. BESS and H2)')  # 5GW at NGET, and 5GW in Scotland (5 * 1/7 + 2/7 at HUNE4), assume uniform for BESS, total 4.8 GW
-    with open(csv_path, 'w', newline='') as csv_file:
-        writer = csv.writer(csv_file)
-        for load in dispatchable_loads:
-            P = load.plini
-            writer.writerow([load.loc_name, P])
-"""
 with open(csv_path, newline='') as csv_file:
     reader = csv.reader(csv_file)
     csv_content = {}
@@ -1210,6 +1201,9 @@ while True:
         Q2[index] = series_capa.GetAttribute('m:Q:bus2') / baseMVA
         index += 1
 
+    print('B4', boundary_B4_flow)
+    print('B6', boundary_B6_flow)
+
     P1_cont = np.zeros((N_branches, N_lines))
     Q1_cont = np.zeros((N_branches, N_lines))
     P2_cont = np.zeros((N_branches, N_lines))
@@ -1655,12 +1649,14 @@ for load in loads:
     # hydro = 0  # Neglected
     other = data[6]
 
-    if load_name != 'BEAU':
-        pass
-        # continue
+    if load_name == 'TUMM':
+        Q_net /= 2  # Necessary to get converging AC OPF, assumed to be handled by Tummel hydro power plant (not modelled)
 
     if load_name == 'NGET':
         continue
+
+    if SOLAR_FACTOR == 0:
+        solar = 0  # Disable PV panels at night
 
     load.scale0 = 0  # Replace load by dynamic equivalent
 
@@ -1699,7 +1695,6 @@ for load in loads:
     der_legacy_share = round(der_legacy_share, 2)
 
     parameter_string = '_'.join([str(i) for i in [load_ratio, der_capacity_factor, der_installed_share, der_legacy_share, TARGET_PERCENTILE]])
-    # print(load_name, parameter_string)
 
     dynamic_equivalent_parameters = {}
     with open(os.path.join('..', 'distrib_networks', 'Optimised_Parameters', 'Optimised_parameters_' + parameter_string + '.txt')) as file:
@@ -1792,7 +1787,7 @@ for load in loads:
         elif param == 'IBG-G99_ibg_ULVRTMinPu':
             der_G99_model.SetAttribute('ULVRTMinPu', value)
         elif param == 'IBG-G99_ibg_ULVRTArmingPu':
-            der_G99_model.SetAttribute('ULVRTMinPu', value)
+            der_G99_model.SetAttribute('ULVRTArmingPu', value)
         elif param == 'IBG-G99_ibg_LVRTc':
             der_G99_model.SetAttribute('c', value)
         elif param == 'IBG-G99_ibg_LVRTd':
@@ -1865,6 +1860,9 @@ for load in loads:
 
     P_net = data[0] - solar * SOLAR_FACTOR - wind * wind_factor - other * CHP_FACTOR
     Q_net = data[1]
+
+    if load_name == 'TUMM':
+        Q_net /= 2
 
     breaker = find_by_loc_name(breakers_dynamic_equivalent, 'Switch CMPLDW {}'.format(load_name))
     P_calc = breaker.GetAttribute('m:Psum:bus1')
