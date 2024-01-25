@@ -625,7 +625,7 @@ boundary_B4_max..
 B4_flow =l= B4_flow_max;
 
 boundary_B6_max..
-B6_flow =l= B6_flow_max * B6_flow_max;
+B6_flow =l= B6_flow_max;
 
 P1_abs_neg(i_branch)..
 P1_abs(i_branch) =g= -P1(i_branch);

@@ -24,7 +24,7 @@ parameter Epsilon;
 Epsilon = 1e-4;
 
 parameter Kg;
-Kg = 1000;
+Kg = 0.1;
 
 *GENERATOR DATA
 
