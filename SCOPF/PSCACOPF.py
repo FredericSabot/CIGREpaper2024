@@ -123,8 +123,8 @@ elif scenario == 2:
 elif scenario == 3:
     year = 2030
     SCENARIO_NAME = 'SummerPM_{}_leading'.format(year)
-    HVDC_SETPOINT = None  # Flow defined by grid constraints and price-dependent loads
-    SCOTLAND_WIND_AVAILABILITY = 0.7 # Leads to 2.8GW through B4 (limit 5.2), 3.3 through B4 (limit 4GW) + 8.8GW through HVDCs
+    HVDC_SETPOINT = 0
+    SCOTLAND_WIND_AVAILABILITY = 0.7
     NGET_WIND_AVAILABILITY = 0.3
 elif scenario == 4:
     year = 2030
@@ -621,8 +621,7 @@ for sync_gen in sync_gens:
 hvdc_interconnection_costs = []
 for hvdc in hvdc_interconnections:
     hvdc_interconnection_costs.append(50 * baseMVA)
-# Sum of HVDC connections via England (modelled as load)
-hvdc_interconnection_costs.append(50 * baseMVA)
+hvdc_interconnection_costs.append(50 * baseMVA)  # Sum of HVDC connections via England (modelled as load)
 
 dispatchable_load_costs = []
 for load in dispatchable_loads:
@@ -772,7 +771,6 @@ def addGamsSet(db, name, description, lst):
         set.add_record(str(i))
     return set
 
-# N_lines = 1  # Removes (almost all) N-1 constraints (test only)
 i_sync = addGamsSet(db_preDC, 'i_sync', 'sync generators', range(1, N_sync_gens + 1))
 i_wind = addGamsSet(db_preDC, 'i_wind', 'wind generators', range(1, N_wind_gens + 1))
 i_syncon = addGamsSet(db_preDC, 'i_syncon', 'syncon generators', range(1, N_syncons + 1))
@@ -1031,6 +1029,7 @@ theta_AC = list({rec.keys[0]:rec.level for rec in db_postAC["theta"]}.values())
 
 Q_penalty = db_postAC["Q_penalty"].first_record().level
 
+cost = db_postAC["cost"].first_record().level
 print('Total cost:', round(cost, 2))
 print('Sync gen:', sum(P_AC_sync) * baseMVA / 1000, ' / ', sum(sync_max) * baseMVA / 1000, '(commited) GW')
 print('Wind gen:', (sum(P_AC_wind) + sum(P_AC_hvdc_spit)) * baseMVA / 1000, ' / ', (sum(wind_max) + spit_total_max) * baseMVA / 1000, 'GW')
@@ -1343,7 +1342,7 @@ while True:
         B6_events.append(['HARK4_ELVA4_1', 'HARK4_ELVA4_2'])
         B6_events.append(['STEW4_ECCL4_1', 'STEW4_ECCL4_2'])
 
-        t_end = 5
+        t_end = 2
         init = app.GetFromStudyCase("ComInc")
         init.iopt_reinc = 2  # Always reinitialise algebraic equations at interuption, seems to significantly improve numerical stability
         init.i_sedirect = 1  # DSL: direct application of events, significantly improve computation time
@@ -1599,7 +1598,6 @@ while True:
         network.update_generators(id=gens['GEN UID'][i], target_v=V)
     """
 
-print('Total cost:', round(cost, 2))
 print('Sync gen:', sum(P_PSCAC_sync) * baseMVA / 1000, ' / ', sum(sync_max) * baseMVA / 1000, '(commited) GW')
 print('Wind gen:', (sum(P_PSCAC_wind) + sum(P_PSCAC_hvdc_spit)) * baseMVA / 1000, ' / ', (sum(wind_max) + spit_total_max) * baseMVA / 1000, 'GW')
 print('Direct imports:', sum(list(P_PSCAC_hvdc_interconnection)[:-1]) * baseMVA / 1000, ' / ', sum(hvdc_interconnection_max[:-1]) * baseMVA / 1000, 'GW (negative if exporting)')
