@@ -858,10 +858,15 @@ on_DC = {rec.keys[0]:rec.level for rec in db_postDC["on"]}
 for i in range(1, N_sync_gens + 1):
     if on_DC.get('{}'.format(i)) is None:
         on_DC['{}'.format(i)] = 0  # Readd values that GAMS deletes for some reason
-on_DC = list(on_DC.values())
-for i, sync_gen in enumerate(sync_gens):
+    sync_gen = sync_gens[i-1]
     if sync_gen.cCategory == 'Hydro' or sync_gen.cCategory == 'Others' or sync_gen.cCategory == 'Nuclear' or sync_gen.loc_name == 'SG HC SLACK NGET4':
-        on_DC[i] = 1  # Do not disconnect hydro plants
+        on_DC[str(i)] = 1  # Do not disconnect hydro plants
+
+# Elements readded are put at the end of the dict, so sort them
+on_DC_list = []
+for i in range(1, N_sync_gens + 1):
+    on_DC_list.append(on_DC[str(i)])
+on_DC = on_DC_list
 
 pf_DC = {rec.keys[0]:rec.level for rec in db_postDC["pf0"]}
 theta_DC = list({rec.keys[0]:rec.level for rec in db_postDC["theta0"]}.values())
