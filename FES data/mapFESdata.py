@@ -1,6 +1,9 @@
 import csv
 import geopy.distance
-import numpy as np
+
+"""
+This scripts maps the location of the substation from the fes regional breakdown (data at 132kV) to the transmission model used (230/400kV) based on closest geographical distance.
+"""
 
 locations_path = 'original/fes2023_regional_breakdown_gsp_info.csv'
 GSP_locations = {}

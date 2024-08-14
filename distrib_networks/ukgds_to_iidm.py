@@ -11,6 +11,10 @@ from joblib import Parallel, delayed
 import shutil
 import random
 
+"""
+This scripts reads UKGDS network files and translate them in Dynawo format and adds dynamic data
+"""
+
 NAMESPACE = 'http://www.rte-france.com/dynawo'
 DYNAWO_PATH = '/home/fsabot/Desktop/dynawo_new/myEnvDynawo.sh'
 DYNAWO_ALGO_PATH = '/home/fsabot/Desktop/dynawo-algorithms/myEnvDynawoAlgorithms.sh'

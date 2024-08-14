@@ -4,13 +4,6 @@ v3 SF: renamed Slack Load(12) to Slack Load TEAL, rename incorrectly named eleme
 v4 SF: increase transformer rating of AGR NGET to 50GW to represent all NGET sync gens
 v5 SF: disable FRT behaviour of HVDC SPIT
 
-Dispatches are generated based on the scenarios below using a security-constrained (AC) optimal power flow (SCOPF).
-
-TODO: update scenario description (see line 100 of PSCACOPF.py)
-
-| Scenario | Description 1     | Description 2   | Gross load S (GW) | Gross load E&W (GW) | DER share | Wind |
-|----------|-------------------|-----------------|-------------------|---------------------|-----------|------|
-| 1        | Summer minimum AM | Leading the way | 2597              | 25584               | 0.4       | 0.8  |
-| 2        | Winter peak       | Leading the way | 5574              | 57179               | 0.4       | 0.8  |
+Dispatches are generated based on the scenarios below using a security-constrained (AC) optimal power flow (SCOPF). Please refer to the paper for the list of studied scenarios.
 
 Data are in Powerfactory 2022 SP4 format
