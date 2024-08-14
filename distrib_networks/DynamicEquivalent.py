@@ -653,4 +653,5 @@ if __name__ == '__main__':
                                 'installed share', der_installed_share, 'legacy', der_legacy_share, 'percentile', target_percentile,
                                 ', objective:', obj)
                         else:
+                            Path(os.path.join('Optimised_Parameters', 'Optimised_parameters_' + parameter_string + '.txt')).touch()
                             print('Case already done')

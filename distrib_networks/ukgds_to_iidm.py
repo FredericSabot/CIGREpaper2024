@@ -811,7 +811,9 @@ def write_crv_file(output_path, book, detailed=False):
     etree.SubElement(crv_root, etree.QName(NAMESPACE, 'curve'), {'model': 'GEN-slack', 'variable': 'generator_PGen'})
     etree.SubElement(crv_root, etree.QName(NAMESPACE, 'curve'), {'model': 'GEN-slack', 'variable': 'generator_QGen'})
 
-    """ # Power in the main transformer
+    etree.SubElement(crv_root, etree.QName(NAMESPACE, 'curve'), {'model': 'NETWORK', 'variable': 'L_Compensation_Q_value'})
+
+    # Power in the main transformer
     tfo_sheet = book.sheet_by_name('Transformers')
     for row_idx in range(29, tfo_sheet.nrows):
         values = get_row_values(tfo_sheet, row_idx)
@@ -822,7 +824,7 @@ def write_crv_file(output_path, book, detailed=False):
         etree.SubElement(crv_root, etree.QName(NAMESPACE, 'curve'), {'model': 'NETWORK', 'variable': tfo_id + '_P1_value'})
         etree.SubElement(crv_root, etree.QName(NAMESPACE, 'curve'), {'model': 'NETWORK', 'variable': tfo_id + '_Q1_value'})
         if not detailed:
-            break  # Only shows curves for the first transformer (supposed to be connected to the GSP) """
+            break  # Only shows curves for the first transformer (supposed to be connected to the GSP)
 
     # Bus voltages
     if detailed:
@@ -932,11 +934,11 @@ def build_network_and_simulate(network_name, load_ratio, der_installed_share, de
 
 if __name__ == '__main__':
     RERUN_SIMULATIONS = True
-    RANDOMISE = True
-    load_ratio = 1
-    der_installed_share = 0.8
-    der_legacy_share = 0.5
-    der_capacity_factor = 1
+    RANDOMISE = False
+    load_ratio = 0.46
+    der_capacity_factor = 0.11
+    der_installed_share = 0.99
+    der_legacy_share = 0.62
 
     if RANDOMISE:
         seeds = range(3)
@@ -958,6 +960,12 @@ if __name__ == '__main__':
     for result in results:
         output_curve_paths.append(result[0])
         network_names.append(result[1])
+
+    # output_curve_paths = output_curve_paths[1]
+    # output_curve_paths = [paths[0] for paths in output_curve_paths]
+
+    #output_curve_paths = [output_curve_paths[3*i+1] for i in range(5)]
+    #network_names = [network_names[3*i+1] for i in range(5)]
 
     fig_name = os.path.join('figs', 'power' + '_load_' + str(load_ratio) + '_der_' + str(der_installed_share) + '_' + str(der_capacity_factor) + '_legacy_' + str(der_legacy_share) + '.pdf')
     merge_curves.plot_power(output_curve_paths, network_names, fig_name)

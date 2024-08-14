@@ -3,10 +3,10 @@ LOAD,load_Alpha,2,2
 LOAD,load_Beta,2,3
 LOAD,load_ActiveMotorShare_0_,0.15,0.19
 LOAD,load_ActiveMotorShare_1_,0.1,0.122
-LOAD,load_ActiveMotorShare_2_,0.05,0.8
+LOAD,load_ActiveMotorShare_2_,0.05,0.08
 IBG-legacy,ibg_IMaxPu,1.0,1.3
 IBG-legacy,ibg_IpRateLimMax,2,3
-IBG-legacy,ibg_ULVRTMinPu,0.75,0.85
+IBG-legacy,ibg_ULVRTMinPu,0.75,0.9
 IBG-legacy,ibg_ULVRTArmingPu,0.8,0.9
 IBG-legacy,ibg_LVRTc,0,1
 IBG-legacy,ibg_LVRTd,0.7,1
